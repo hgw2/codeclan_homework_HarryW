@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Day 2 Homework
+
+The data for this homework comes from an Open Data Science website called Kaggle. Kaggle has many open source datasets for you to use and most of them come with code uploaded by other users showing different ways to explore the data. It is a great way to learn about data-wrangling and analysis and if you are interested then set up your own account and get going.
+
+For this task we will make use of their Starbucks Calorie dataset. You can find out more information about each dataset and what each column represents , but we have put the version you need in your data folder.
+
+## Question 1
+Load in the dataset and have a look at it. What are the dimensions, variable types, variable names, etc.?
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+starbucks_data <- read_csv("data/starbucks_drinkMenu_expanded.csv")
+```
+
+```{r}
+ncol(starbucks_data)
+nrow(starbucks_data)
+```
+
+
+
+```{r}
+names(starbucks_data)
+```
+
+
+```{r}
+glimpse(starbucks_data)
+```
+
