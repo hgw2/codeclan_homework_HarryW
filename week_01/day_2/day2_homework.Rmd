@@ -36,3 +36,27 @@ names(starbucks_data)
 glimpse(starbucks_data)
 ```
 
+## Question 2
+Let’s first investigate the calories of different drinks. Select the variables Beverage_category, Beverage, Beverage prep and Calories from your data. Since we are interested in the calorie content, check if there are any NA values in the data, and drop them if there are.
+
+```{r}
+  starbucks_data1 <- starbucks_data %>% 
+  select(Beverage_category: Calories) %>% 
+  filter(is.na(Calories))
+starbucks_data1
+
+
+```
+
+```{r}
+starbucks_data <- starbucks_data %>% 
+  select(Beverage_category: Calories) %>% 
+  filter(!is.na(Calories))
+starbucks_data
+```
+
+There are no NA values
+
+## Question 3
+ Create a new variable (column) called calorie_diff, which stores the difference between 135 calories (135 calories = 10 cubes of sugar!) and the calories in each drink. (hint: you’ll want to subtract the calories from 135 to see which drink have more or less than 10 cups of sugar).
+ 
