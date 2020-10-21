@@ -49,19 +49,26 @@ starbucks_data1
 ```
 
 ```{r}
-starbucks_data <- starbucks_data %>% 
+starbucks_data %>% 
   select(Beverage_category: Calories) %>% 
   filter(!is.na(Calories))
-starbucks_data
+
 ```
 
 There are no NA values
+
+MODEL ANSWER
+```{r}
+starbucks_data %>% 
+  select(Beverage_category: Calories)
+```
+
 
 ## Question 3
  Create a new variable (column) called calorie_diff, which stores the difference between 135 calories (135 calories = 10 cubes of sugar!) and the calories in each drink. (hint: you’ll want to subtract the calories from 135 to see which drink have more or less than 10 cups of sugar).
  
 ```{r}
-starbucks_data <- mutate(starbucks_data, calorie_diff = 135 - Calories)
+starbucks_data <- mutate(starbucks_data, calorie_diff = Calories - 135)
 starbucks_data_cals <- arrange(starbucks_data, desc(calorie_diff))
 starbucks_data_cals 
 
@@ -70,12 +77,14 @@ starbucks_data_cals
 ## Question 4
 Summarise the mean number of calories in each beverage_category. Which 3 drinks have the most calories? Which 3 drinks have the least? Write a small summary of your findings.
 ```{r}
-mean_beverage_cat <- starbucks_data %>% 
+ starbucks_data %>% 
   group_by(Beverage_category) %>% 
   summarise(mean_calories = mean(Calories)) %>% 
-  arrange(desc(mean_calories))
+  arrange(desc(mean_calories)) %>% 
+  head(3)
 
-mean_beverage_cat
+
+
 ```
 Smoothies, Frappuccino® Blended Coffee and Signature Espresso Drinks on average contain the largest amount of calories. Whilst Coffee, Shaken Iced Beverages, Classic Espresso Drinks on average contain the lowest number of calories.
 
@@ -96,13 +105,13 @@ Hint: to answer this, you’ll have to first figure out what the average calorie
 
 ```{r}
 mean_calories_total <- summarise(starbucks_data, mean = mean(Calories))
-mean_calories_total
+mean_calories_total <- pull(mean_calories_total)
 ```
 Mean calories is 193.8719	
 
 ```{r}
 mean_beverage_prep %>% 
-  filter(mean_calories > 193.8719)
+  filter(mean_calories > mean_calories_total )
 ```
 
 ## Question 7
@@ -113,6 +122,7 @@ starbucks_data %>%
   filter(Beverage_category != "Tazo® Tea Drinks") %>%
   group_by(Beverage_category, Beverage, Beverage_prep) %>%
   summarise(min_calories = min(Calories)) %>%
-  arrange(min_calories) 
+  arrange(min_calories)  %>% 
+  head(1)
 ```
 
