@@ -102,10 +102,18 @@ Mean calories is 193.8719
 
 ```{r}
 mean_beverage_prep %>% 
-  filter(mean_calories > 193.8719	)
+  filter(mean_calories > 193.8719)
 ```
 
 ## Question 7
 Which is the best type of coffee drink to get if you’re worried about consuming too many calories?
 
-If you are worried about consuming too many calories, the best types of coffee drinks to get are the smaller coffee based drinks. These could include Short, Doppio or Solo types or prepped drinks any drinks with milk should be avoided. You should also try to stick to Classic Espresso drinks, Coffees or Shaken iced beverages as these, on average, contain the lowest number of calories. One drink which should certainly be avoided is the White Chocolate Mocha (Without Whipped Cream) made with 2% milk as this contain the equivalent number of calories as 30 cubes of sugar!
+```{r}
+starbucks_data %>%
+  filter(Beverage_category != "Tazo® Tea Drinks") %>%
+  group_by(Beverage_category, Beverage, Beverage_prep) %>%
+  summarise(min_calories = min(Calories)) %>%
+  arrange(min_calories) %>%
+  head(1)
+```
+
