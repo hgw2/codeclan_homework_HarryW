@@ -61,7 +61,7 @@ There are no NA values
  Create a new variable (column) called calorie_diff, which stores the difference between 135 calories (135 calories = 10 cubes of sugar!) and the calories in each drink. (hint: you’ll want to subtract the calories from 135 to see which drink have more or less than 10 cups of sugar).
  
 ```{r}
-starbucks_data <- mutate(starbucks_data, calorie_diff = Calories - 135)
+starbucks_data <- mutate(starbucks_data, calorie_diff = 135 - Calories)
 starbucks_data_cals <- arrange(starbucks_data, desc(calorie_diff))
 starbucks_data_cals 
 
@@ -113,7 +113,6 @@ starbucks_data %>%
   filter(Beverage_category != "Tazo® Tea Drinks") %>%
   group_by(Beverage_category, Beverage, Beverage_prep) %>%
   summarise(min_calories = min(Calories)) %>%
-  arrange(min_calories) %>%
-  head(1)
+  arrange(min_calories) 
 ```
 
