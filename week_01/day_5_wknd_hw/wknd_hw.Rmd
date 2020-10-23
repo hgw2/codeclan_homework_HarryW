@@ -1,0 +1,56 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Packages
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+
+#Load in data
+```{r}
+books <- read_csv("data/books.csv")
+```
+```{r}
+books
+```
+
+
+
+```{r}
+names(books)
+
+dim(books)
+```
+I am going to drop bookID, isbn, isbn13 and publication_date as I don't think these will be necessary.
+
+```{r}
+books_subset <- books %>%
+  select(-bookID, -isbn, -isbn13, -publication_date)
+
+head(books_subset)
+```
+
+##Check for NAs
+
+```{r}
+books_subset %>%
+  summarise(across(.fns = ~sum(is.na(.x))))
+```
+There are not too many NAs but it will be good to deal with them. For any of the NAs in author, language code and publisher I will replace with unavailable.
+
+```{r}
+books_cleaned <- books_subset %>% 
+  mutate(authors = coalesce(authors, "unavailable")) %>% 
+  mutate(language_code = coalesce(language_code, "unavailable")) %>% 
+  mutate(publisher = coalesce(publisher, "unavailable"))
+
+books_cleaned %>%
+  summarise(across(.fns = ~ sum(is.na(.x))))
+```
+
+For average_rating and num_pages I am going to impute the median for those values 
+

@@ -7,7 +7,12 @@ output: html_notebook
 library(tidyverse)
 movies <- read_csv("data/movies.csv")
 
-movies
+
+
+
+summary(movies)
+
+
 ```
 
 ## Question 1
@@ -34,6 +39,9 @@ movies_selected %>%
   summarise(na_original_title = sum(is.na(original_title)), 
             na_runtime = sum(is.na(runtime)),
             na_budget = sum(is.na(budget)))
+
+movies_selected %>% 
+  summarise(across(.fns = ~sum(is.na(.x))))
 ```
 
 ## Question 4
@@ -61,6 +69,8 @@ movies_imputed %>%
   summarise(na_original_title = sum(is.na(original_title)), 
             na_runtime = sum(is.na(runtime)),
             na_budget = sum(is.na(budget)))
+
+
 ```
 
 ##Question 6.
@@ -89,7 +99,7 @@ movies_imputed %>%
 movies_imputed <- movies_imputed %>% 
   mutate(budget = if_else(budget < 100, median(budget), budget)) 
 
-movies_imputed 
+movies_imputed
 
 ```
 # Extension 
@@ -119,10 +129,15 @@ Take the original dataset with all the variables. Using across and where, summar
 
 ```{r}
 movies %>% 
-  summarise(across(where(is.numeric), ~sum(is.na(.x))),
-            across(where(is.character), ~sum(is.na(.x))))
+  summarise(across(where(is.numeric), ~sum(is.na(.x))))
+           
 ```
 
+```{r}
+movies %>% 
+  summarise(across(where(is.character), ~sum(is.na(.x))))
+
+```
 
 
 
