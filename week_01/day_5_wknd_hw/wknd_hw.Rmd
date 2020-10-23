@@ -38,19 +38,97 @@ head(books_subset)
 
 ```{r}
 books_subset %>%
-  summarise(across(.fns = ~sum(is.na(.x))))
+  summarise(across(.fns = ~ sum(is.na(.x))))
 ```
 There are not too many NAs but it will be good to deal with them. For any of the NAs in author, language code and publisher I will replace with unavailable.
 
 ```{r}
-books_cleaned <- books_subset %>% 
-  mutate(authors = coalesce(authors, "unavailable")) %>% 
-  mutate(language_code = coalesce(language_code, "unavailable")) %>% 
-  mutate(publisher = coalesce(publisher, "unavailable"))
+books_cleaned <- books_subset %>%
+  mutate(authors = coalesce(authors, "unavailable"),
+         language_code = coalesce(language_code, "unavailable"),
+         publisher = coalesce(publisher, "unavailable")
+  )
+  
+
+```
+
+For average_rating and num_pages I am going to impute the median for those values.
+
+```{r}
+books_cleaned <- books_cleaned %>%
+  mutate(
+    average_rating =
+      coalesce(average_rating, median(average_rating, na.rm = TRUE)),
+    num_pages =
+      coalesce(num_pages, median(num_pages, na.rm = TRUE))
+  )
+
 
 books_cleaned %>%
   summarise(across(.fns = ~ sum(is.na(.x))))
 ```
+Finally for ratings_count and text_reviews_count seeing as this is the number of reviews or ratings each book has I will replace with 0.
 
-For average_rating and num_pages I am going to impute the median for those values 
+```{r}
+books_cleaned <- books_cleaned %>%
+  mutate(ratings_count = coalesce(ratings_count, 0),
+         text_reviews_count = coalesce(text_reviews_count, 0)
+  )
+```
 
+```{r}
+books_cleaned %>%
+  summarise(across(.fns = ~ sum(is.na(.x))))
+```
+#Recoding language_code
+Looking at the head of the table I can see that there are at least two languages for English. I will explore this further
+
+```{r}
+books_cleaned %>% 
+  distinct(language_code) %>%
+  arrange(language_code)
+```
+There are a 2 numerical values so I will replace them with unavailable 
+
+```{r}
+books_cleaned <- books_cleaned %>% 
+  mutate(language_code = recode(language_code, 
+                                "9780674842113" = "unavailable",
+                                "9780851742717" = "unavailable")
+  )
+```
+
+I am going to change all the english codes to english, enm to middle_english and all the foreign languages into foreign_language
+
+```{r}
+books_cleaned_lang <- books_cleaned %>% 
+  mutate(language_code = recode(language_code, 
+                                "en-CA" = "english",
+                                "en-GB" = "english",
+                                "en-US" = "english",
+                                "eng" = "english",
+                                "enm" = "middle_english",
+                                "unavailable" ="unavailable",
+                                .default = "foreign_language"
+                                )
+  )
+```
+
+As we are no longer using language codes I am changing the name to language
+```{r}
+ books_cleaned_lang <- books_cleaned_lang %>% 
+  rename(language = language_code)
+```
+
+Lets count to see how many we have in each language
+```{r}
+books_cleaned_lang %>% 
+  group_by(language) %>% 
+  summarise(count = n())
+```
+
+Seeing as I can't speak any foreign languages I am going to drop the foreign_language and unavailable books 
+```{r}
+eng_books <- books_cleaned_lang %>%  
+  filter(language == "english", language == "middle_english")
+```
