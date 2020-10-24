@@ -294,8 +294,13 @@ read_categories <-read_time_book %>%
   )
 ```
 
-#Top 10 in each read category 
 
+```{r}
+read_categories %>% 
+  group_by(time_category) %>% 
+  summarise(total = n())
+```
+#Top 10 in each read category 
 ## Top 10 quick reads
 
 ```{r}
@@ -324,5 +329,66 @@ read_categories %>%
 
 
 #Ratings category
+ I will create a over system where 2 million as a must own. Between 2 million and 500,000 a nice to own. between 500,000 and 100,000 a library filler and under 100,000 as avoid
+ 
+```{r}
+own_categories <-read_categories%>% 
+  mutate(
+    own_category = case_when(
+      total_score < 1e5 ~ "Avoid",
+      total_score < 5e5 ~ "Library filler",
+      total_score < 2e6 ~ "Nice to own",
+      total_score >= 2e6 ~"Must own"
+      )
+  )
 
+
+```
+```{r}
+own_categories %>% 
+  group_by(own_category) %>% 
+  summarise(total = n())
+```
+ 
 #Random library generator 
+
+Say we wanted to create a library of 200 books. It must contain all 62 of the must own books and the rest a random selection of the nice to own books.
+```{r}
+must_own <- own_categories %>% 
+  filter(own_category =="Must own") %>% 
+  select(title, authors)
+
+must_own
+```
+
+Random nice to have books 
+
+```{r}
+nice_to_have<- own_categories %>% 
+  filter(own_category =="Nice to own") %>% 
+  select(title, authors) %>% 
+  sample_n(size = 200 - 62)
+
+nice_to_have
+
+```
+```{r}
+random_library <- rbind(must_own, nice_to_have) %>% 
+  arrange(title)
+
+random_library
+```
+Say I was going on holiday and wanted to select 5 books to take with me, they must be quick to read and a good read.
+
+```{r}
+holiday_books <- own_categories %>% 
+  filter(
+    own_category == "Must own" |  own_category == "Nice to own", 
+    time_category == "Quick Read") %>% 
+  sample_n(5) %>% 
+  select(title) %>% 
+  pull(title)
+
+holiday_books
+```
+
