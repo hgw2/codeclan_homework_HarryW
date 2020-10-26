@@ -151,7 +151,7 @@ books_cleaned_lang <- books_cleaned %>%
   )
 ```
 
-As we are no longer using language codes I am changing the name of teh column to language.
+As we are no longer using language codes I am changing the name of the column to language.
 
 ```{r}
 books_cleaned_lang <- books_cleaned_lang %>%
