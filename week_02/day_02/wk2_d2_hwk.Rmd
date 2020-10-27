@@ -1,0 +1,75 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+tweets <- read_csv("data/code_clan_tweets.csv")
+info <- read_csv("data/code_clan_info.csv")
+```
+
+```{r}
+dim(tweets)
+names(tweets)
+head(tweets)
+```
+## Question 2
+Find the total number of favourited tweets (stored in favorite_count) that CodeClan tweets have got. Don’t add a tweet’s favorite_count to the total when the tweet was quoted (see the is_quote variable).
+
+```{r}
+tweets %>% 
+   filter(is_quote == FALSE) %>% 
+  summarise(total_favourite_tweets = sum(favorite_count))
+  
+tweets %>% 
+  filter(is_quote == FALSE) %>%
+  tally(favorite_count)
+
+```
+
+## Question 3
+Summarise the mean number of retweets (retweet_count), split by the type of platform that was used to tweet (source). Again, omit quoted tweets from the mean.
+```{r}
+tweets %>% 
+  filter(is_quote == FALSE) %>% 
+  group_by(source) %>% 
+  summarise(mean_retweets = mean(retweet_count))
+```
+
+## Question 4
+Count the total number of likes (i.e. total of favorite_count), split by media type, and arrange them from most likes to least. Assume that any tweets without a listed media type are of type “text”.
+
+```{r}
+tweets %>% 
+  mutate(media_type = coalesce(media_type, "text")) %>% 
+  group_by(media_type) %>% 
+  summarise(total_likes = mean(favorite_count))
+  
+```
+
+## Question 5
+
+Find the mean number of characters that a CodeClan tweet contains.
+```{r}
+tweets %>% 
+  summarise(mean_character_count = mean(display_text_width))
+```
+
+## Question 6
+The code_clan_info.csv data file contains status_url along with other info. Load this in, and join it to the code_clan_tweets tibble, so that you have a status_url for each tweet. Decide which variable to join the tibbles on.
+
+```{r}
+head(info)
+head(tweets)
+```
+
+
+```{r}
+tweets_url <- tweets %>% 
+  left_join(info, by = "tweet_id")
+```
+

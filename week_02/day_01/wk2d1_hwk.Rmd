@@ -10,32 +10,29 @@ library(janitor)
 
 
 ```{r}
-cards <- read_csv("data/CardBase.csv")
-customers <- read_csv("data/CustomerBase.csv")
-fraud <- read_csv("data/FraudBase.csv")
-transactions <- read_csv("data/TransactionBase.csv")
+cards <- read_csv("data/CardBase.csv") %>%  clean_names()
+customers <- read_csv("data/CustomerBase.csv") %>% clean_names()
+fraud <- read_csv("data/FraudBase.csv") %>%  clean_names()
+transactions <- read_csv("data/TransactionBase.csv") %>%  clean_names()
 ```
 
 ```{r}
 clean_names(cards)
-names(cards) <- tolower(names(cards))
-head(cards)
+
 ```
 ```{r}
-head(customers)
-names(customers) <- tolower(names(customers))
-head(customers)
+clean_names(customers)
 ```
 
 
 ```{r}
-head(fraud)
-names(fraud) <- tolower(names(fraud))
+clean_names(fraud)
 ```
 
 ```{r}
+
+clean_names(transactions)
 head(transactions)
-names(transactions) <- tolower(names(transactions))
 ```
 ## Question 2
 
@@ -53,7 +50,7 @@ Join the data containing fraud details with transaction details so all rows of b
 
 ```{r}
 fraud %>% 
-  inner_join(transactions, by = "transaction_id")
+  full_join(transactions, by = "transaction_id")
 ```
 Question 4
 
@@ -106,8 +103,8 @@ Can you join all 4 datasets together so that you’re left with a dataset that l
 
 ```{r}
 cards %>% 
-  left_join(customers, by = "cust_id") %>% 
-  left_join(transactions, by = c("card_number" = "credit_card_id")) %>% 
+  inner_join(customers, by = "cust_id") %>% 
+  inner_join(transactions, by = c("card_number" = "credit_card_id")) %>% 
   inner_join(fraud, by = "transaction_id")
 ```
 Question 2
