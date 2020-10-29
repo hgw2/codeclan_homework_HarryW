@@ -47,7 +47,7 @@ Count the total number of likes (i.e. total of favorite_count), split by media t
 tweets %>% 
   mutate(media_type = coalesce(media_type, "text")) %>% 
   group_by(media_type) %>% 
-  summarise(total_likes = mean(favorite_count))
+  summarise(total_likes = sum(favorite_count))
   
 ```
 
@@ -100,12 +100,26 @@ Use the str_detect() function to find all tweets with text that mentions “Edin
 ```{r}
 tweets %>% 
   mutate(str_detect = str_detect(text, "[Ee]dinburgh")) %>% 
-           filter(str_detect == T)
+           filter(str_detect == T) %>% 
+  summarise(total = n())
+ 
 ```
 ## Question 10
 Use str_extract_all() with a regular expression to find out which Twitter users CodeClan have been tweeting
 
 ```{r}
 tweets %>%  
-  mutate(tweeters = str_extract_all(text, "@[A-Za-z0-9_]+", simplify =  T)) 
+  mutate(tweeters = str_extract_all(text, "@[A-z_]{1,15}")) %>% 
+  select(tweeters, text) %>% 
+ pull(tweeters)
 
+```
+
+
+```{r}
+tweets %>%  
+  mutate(tweeters = str_extract_all(text, "(^|[^@\\w])@(\\w{1,15})\\b")) %>% 
+  select(tweeters, text) %>% 
+ pull(tweeters)
+
+```

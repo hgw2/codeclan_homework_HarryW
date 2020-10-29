@@ -1,0 +1,164 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Question 1
+Find the weather forecast for the next three days Each list element should have the name of the day of the week. Inside each element should be another named list that tells you the temperature, chance of rain and wind speed.
+
+```{r}
+weather <- list(
+  Thursday = list(rain = "66%", wind = "11km/h", temp = "12C"),
+  Friday = list(rain = "40%", wind = " 7km/h", temp = "14C"),
+  Saturday = list(rain = "69%", wind = "13km/h", temp = "13C")
+)
+```
+
+The chance of rain tomorrow
+```{r}
+weather$Thursday$rain
+```
+
+# Question 2
+The wind speed on the day after tomorrow
+```{r}
+weather$Friday$wind
+```
+
+The wind speed on the day after tomorrow
+```{r}
+weather$Thursday$temp
+```
+
+# Question 3
+Find a 14 day forecast and create a matrix of the forecasts for temperature, where each week is one row.
+
+You will want to give a name to the matrix you create.
+
+```{r}
+fortnight_temps <- c(10, 14, 14, 13, 12, 9, 10, 11, 10, 9, 8, 10, 11, 9)
+
+fortnight_forcast <- matrix(fortnight_temps, nrow = 2, ncol = 7)
+
+fortnight_forcast
+```
+
+The third day of the second week
+```{r}
+fortnight_forcast[2, 3]
+```
+
+The whole second week
+```{r}
+fortnight_forcast[2, ]
+```
+
+The first, third and fifth days in both weeks.
+```{r}
+fortnight_forcast[, c(1, 3, 5)]
+```
+
+# Question 4
+Write a function that pre-appends “The answer is:” to any character input, and either returns the number for numbers less than 10, or divides the number by 10 for numbers greater than 10. For anything else return “Invalid input”.
+
+```{r}
+maths_function <- function(x) {
+  if (x < 10) {
+    result <- x
+  } else if (x > 10) {
+    result <- x / 10
+  } else {
+    result <- "Invalid input"
+  }
+  return(paste("The answer is:", result))
+}
+```
+
+```{r}
+maths_function(12)
+```
+
+# Question 5
+
+```{r}
+x <- c(1, 2, 3)
+y <- c(1:3)
+
+all(x == y)
+```
+
+```{r}
+vector_check <- function(x, y) {
+  if (all(x == y)) {
+    return("Exactly the same")
+  } else if (all(sort(x) == sort(y))) {
+    return("The same")
+  } else {
+    return("Different")
+  }
+}
+```
+
+```{r}
+x <- c(1, 2, 3)
+y <- c(3:1)
+
+vector_check(x, y)
+```
+
+# Question 6
+```{r}
+product_matrix <- matrix(nrow = 12, ncol = 12)
+product_matrix
+```
+
+
+Write code that prints a multiplication table for numbers up to 12. i.e. there will be 12 rows and 12 columns, and each element should be the row number multiplied by the column number.
+```{r}
+num_rows <- dim(product_matrix)[1]
+num_cols <- dim(product_matrix)[2]
+
+for (row_number in 1:num_rows) {
+  for (col_number in 1:num_cols) {
+    product_matrix[row_number, col_number] <- row_number * col_number
+  }
+}
+product_matrix
+```
+
+```{r}
+library(tidyverse)
+
+x <- c(1, 2, 3)
+cat(" 1 |", rep("*", 3), "\n", "2 |", rep("*", 4))
+```
+```{r}
+text_art_histogram <- function(x) {
+  for (number in 1:length(x)) {
+    column <- cat(number, " | ", rep("*", x[number]), "\n", sep = "")
+    cat(column)
+  }
+}
+
+
+x <- c(5, 2, 4, 7, 22, 7, 34, 1, 46, 34)
+text_art_histogram(x)
+```
+
+```{r}
+# Histogram up to 178 x 178
+text_art_histogram <- function(x) {
+  for (number in 1:length(x)) {
+    if (number < 10) {
+      column <- cat(number, "   | ", rep("*", x[number]), "\n", sep = "")
+    } else if (number < 100) {
+      column <- cat(number, "  | ", rep("*", x[number]), "\n", sep = "")
+    } else {
+      column <- cat(number, " | ", rep("*", x[number]), "\n", sep = "")
+    }
+    cat(column)
+  }
+}
+
+x <- c(1:178)
+text_art_histogram(x)
+```
