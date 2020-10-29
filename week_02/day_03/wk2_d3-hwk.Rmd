@@ -37,8 +37,11 @@ You will want to give a name to the matrix you create.
 ```{r}
 fortnight_temps <- c(10, 14, 14, 13, 12, 9, 10, 11, 10, 9, 8, 10, 11, 9)
 
-fortnight_forcast <- matrix(fortnight_temps, nrow = 2, ncol = 7)
+fortnight_forcast <- matrix(fortnight_temps, nrow = 2, ncol = 7, byrow = TRUE)
 
+
+colnames(fortnight_forcast) <- c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")
+rownames(fortnight_forcast) <- c("Week 1", "Week 2")
 fortnight_forcast
 ```
 
@@ -145,7 +148,7 @@ text_art_histogram(x)
 ```
 
 ```{r}
-# Histogram up to 178 x 178
+# Histogram up to 129 x 129
 text_art_histogram <- function(x) {
   for (number in 1:length(x)) {
     if (number < 10) {
@@ -159,6 +162,6 @@ text_art_histogram <- function(x) {
   }
 }
 
-x <- c(1:178)
+x <- c(1,18,40,3,12,26)
 text_art_histogram(x)
 ```
