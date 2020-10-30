@@ -40,7 +40,7 @@ fortnight_temps <- c(10, 14, 14, 13, 12, 9, 10, 11, 10, 9, 8, 10, 11, 9)
 fortnight_forcast <- matrix(fortnight_temps, nrow = 2, ncol = 7, byrow = TRUE)
 
 
-colnames(fortnight_forcast) <- c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")
+colnames(fortnight_forcast) <- c("Thur", "Fri", "Sat", "Sun","Mon", "Tue", "Wed")
 rownames(fortnight_forcast) <- c("Week 1", "Week 2")
 fortnight_forcast
 ```
@@ -77,14 +77,57 @@ maths_function <- function(x) {
 ```
 
 ```{r}
-maths_function(12)
+maths_function <- function(x) {
+  if (is.character(x)){
+    result <- x
+  } 
+  
+  if(is.numeric(x)){
+    if (x < 10) {
+      result <- x
+    } else if (x > 10) {
+      result <- x / 10
+    } else {
+      result <- "Invalid input"
+    }
+  } 
+  
+  result <- "Invalid input"
+  return(paste("The answer is:", result))
+}
+```
+
+```{r}
+answer_or_divide <- function(x) {
+  if (is.character(x)) {
+    return(paste("The answer is: ", x))
+  }
+
+  if (is.numeric(x)) {
+    if (x < 10) {
+      return(x)
+    } else {
+      return(x / 10)
+    }
+  }
+
+  return("Invalid input")
+}
+```
+
+```{r}
+maths_function(T)
+answer_or_divide(T)
+```
+```{r}
+
 ```
 
 # Question 5
 
 ```{r}
 x <- c(1, 2, 3)
-y <- c(1:3)
+y <- c(1,3, 4)
 
 all(x == y)
 ```
@@ -150,18 +193,24 @@ text_art_histogram(x)
 ```{r}
 # Histogram up to 129 x 129
 text_art_histogram <- function(x) {
-  for (number in 1:length(x)) {
+  
+  distinct <- sort(unique(x))
+  
+  for (number in distinct) {
+     
+    count <- sum(x == number)
+    
     if (number < 10) {
-      column <- cat(number, "   | ", rep("*", x[number]), "\n", sep = "")
+      column <- cat(number, "   | ", rep("*", count), "\n", sep = "")
     } else if (number < 100) {
-      column <- cat(number, "  | ", rep("*", x[number]), "\n", sep = "")
+      column <- cat(number, "  | ", rep("*", count), "\n", sep = "")
     } else {
-      column <- cat(number, " | ", rep("*", x[number]), "\n", sep = "")
+      column <- cat(number, " | ", rep("*", count), "\n", sep = "")
     }
     cat(column)
   }
 }
 
-x <- c(1,18,40,3,12,26)
+x <- sample(1:10, 100, replace = TRUE)
 text_art_histogram(x)
 ```
