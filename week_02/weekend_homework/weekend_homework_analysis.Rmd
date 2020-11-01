@@ -7,7 +7,7 @@ output: html_notebook
 Read the cleaned data into R.
 ```{r}
 source("scripts/clean_data_script.R")
-meteorite_landings <- read_csv("clean_data/meteorite_landings_clean.csv")
+meteorite_landings <- read_csv("clean_data/meteorite_landings_clean_kg.csv")
 head(meteorite_landings)
 ```
 
