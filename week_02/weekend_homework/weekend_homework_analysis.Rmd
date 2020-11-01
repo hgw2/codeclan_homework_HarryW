@@ -38,8 +38,9 @@ meteorite_landings %>%
   group_by(year) %>% 
   summarise(no_of_meteorites_found = n())
 ```
+
 # Extension 
-Using bboxfinder I was able to find the coordinents for the continent and create a case when which took   the latitude and longitude from the meteorite findings and categorized this into their continents. I then used this information to create a function to show this information 
+Using bboxfinder I was able to find the latitude and longitude for the continent and create a case when which took   the latitude and longitude from the meteorite findings and categorized this into their continents. I then used this information to create a function to show this information 
 ```{r}
 
 source("functions/show_continent_function.R")
@@ -55,6 +56,7 @@ meteorite_landings <- meteorite_landings %>%
 meteorite_landings
 ```
 
+# Number of meteorites per continent 
 ```{r}
 meteorite_landings %>% 
   group_by(continent) %>% 
@@ -67,7 +69,7 @@ meteorite_landings <- meteorite_landings %>%
 
 head(meteorite_landings)
 ```
-
+# Top mteroites by continent
 ```{r}
 meteorite_landings %>% 
   group_by(continent) %>% 
