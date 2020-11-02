@@ -16,9 +16,8 @@ meteorite_landings %>%
     "fall",
     "year",
     "GeoLocation"
-  ))
-
-
+  )
+  )
 
 # Clean names ----------------------------------------------------------
 
@@ -33,7 +32,8 @@ meteorite_landings_clean <- meteorite_landings_clean %>%
   separate(
     col = geo_location,
     into = c("latitude", "longitude"),
-    sep = ", ") %>%
+    sep = ", "
+  ) %>%
   mutate(
     latitude = as.numeric(latitude),
     longitude = as.numeric(longitude)

@@ -1,6 +1,4 @@
 show_continent <- function(latitude, longitude) {
-  
-  
   if (longitude > 180 |
     longitude < -180 |
     latitude > 90 |

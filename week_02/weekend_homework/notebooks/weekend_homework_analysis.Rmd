@@ -14,8 +14,8 @@ head(meteorite_landings)
 # Question 2
 Find the names and years found for the 10 largest meteorites in the data
 ```{r}
-meteorite_landings %>% 
-  filter(fall == "Found") %>% 
+meteorite_landings %>%
+  filter(fall == "Found") %>%
   slice_max(mass_g, n = 10, with_ties = FALSE)
 ```
 
@@ -24,8 +24,8 @@ Find the average mass of meteorites that were recorded falling, vs. those which 
 
 
 ```{r}
-meteorite_landings %>% 
-  group_by(fall) %>% 
+meteorite_landings %>%
+  group_by(fall) %>%
   summarise(avg_mass_g = mean(mass_g))
 ```
 
@@ -33,9 +33,9 @@ meteorite_landings %>%
 Find the number of meteorites in each year, for every year since 2000
 
 ```{r}
-meteorite_landings %>% 
-  filter(year >= 2000) %>% 
-  group_by(year) %>% 
+meteorite_landings %>%
+  filter(year >= 2000) %>%
+  group_by(year) %>%
   summarise(no_of_meteorites_found = n())
 ```
 
@@ -45,12 +45,11 @@ Using bboxfinder I was able to find the latitude and longitude for the continent
 
 source("functions/show_continent_function.R")
 
-show_continent(27.05000, -105.43333)
-
+show_continent(TRUE, -105.43333)
 ```
 
 ```{r}
-meteorite_landings <- meteorite_landings %>% 
+meteorite_landings <- meteorite_landings %>%
   mutate(continent = show_continent(latitude, longitude))
 
 meteorite_landings
@@ -58,21 +57,20 @@ meteorite_landings
 
 # Number of meteorites per continent 
 ```{r}
-meteorite_landings %>% 
-  group_by(continent) %>% 
+meteorite_landings %>%
+  group_by(continent) %>%
   summarise(count = n())
 ```
 
 ```{r}
-meteorite_landings <- meteorite_landings %>% 
-  mutate(mass_kg = mass_g/1000, .after = mass_g)
+meteorite_landings <- meteorite_landings %>%
+  mutate(mass_kg = mass_g / 1000, .after = mass_g)
 
 head(meteorite_landings)
 ```
 # Top mteroites by continent
 ```{r}
-meteorite_landings %>% 
-  group_by(continent) %>% 
-slice_max(mass_kg, n = 1, with_ties = FALSE)
+meteorite_landings %>%
+  group_by(continent) %>%
+  slice_max(mass_kg, n = 1, with_ties = FALSE)
 ```
-
