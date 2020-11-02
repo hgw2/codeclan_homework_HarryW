@@ -125,3 +125,34 @@ SELECT
 FROM employees 
 GROUP BY EXTRACT(YEAR FROM start_date) 
 ORDER BY EXTRACT(YEAR FROM start_date) 
+
+--Q2 Return the first_name, last_name and salary of all employees together with a new column called salary_class with a value 'low' where salary is less than 40,000 and value 'high'
+-- where salary is greater than or equal to 40,000.
+
+SELECT 
+	first_name,
+	last_name,
+	salary, 
+	CASE
+	  WHEN salary < 40000 THEN 'Low'
+	  WHEN salary >= 40000 THEN 'High'
+	END salary_class
+FROM employees
+
+-- Q3 The first two digits of the local_sort_code (e.g. digits 97 in code 97-09-24) in the pay_details table are indicative of the region of an account. 
+-- Obtain counts of the number of pay_details records bearing each set of first two digits? Make sure that the count of NULL local_sort_codes comes at the top of the table, 
+-- and then order all subsequent rows first by counts in descending order, and then by the first two digits in ascending order
+
+SELECT 
+	SUBSTRING(local_sort_code, 1, 2) AS first_two_digits,
+	 COUNT(id) AS count_records
+FROM pay_details 
+GROUP BY SUBSTRING(local_sort_code,1, 2)
+ORDER BY COUNT(id) DESC,  SUBSTRING(local_sort_code,1, 2) ASC
+
+--Q4 Return only the numeric part of the local_tax_code in the pay_details table, preserving NULLs where they exist in this column.
+SELECT 
+REGEXP_REPLACE(local_tax_code,'\D','','g') AS numeric_tax_code
+FROM pay_details 
+
+	
