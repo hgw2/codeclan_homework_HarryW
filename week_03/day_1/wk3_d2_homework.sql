@@ -76,11 +76,8 @@ SELECT
 	fte_hours,
 	COUNT(id) AS number_of_employees_in_each_department
 FROM employees 
-GROUP BY 
-	department,
-	fte_hours
-ORDER BY department ASC,
-fte_hours ASC
+GROUP BY department,fte_hours
+ORDER BY department ASC NULLS LAST ,fte_hours ASC NULLS LAST
 
 
 --Q11 Obtain a table showing any departments in which there are two or more employees lacking a stored first name. 
