@@ -96,3 +96,73 @@ FROM teams AS t INNER JOIN team_count
 ON t.name = team_count.name
 WHERE team_count.charge * team_count.num_employees > 5000
 
+-- Simpler way
+
+WITH team_count(id, num_employees) AS (
+SELECT
+	t.id,
+	count(e.id)
+FROM employees AS e INNER JOIN teams AS t 
+ON e.team_id = t.id
+GROUP BY t.id
+)
+SELECT 	
+	t.name,
+	CAST(t.charge_cost AS REAL) * team_count.num_employees AS total_day_charge
+FROM teams AS t INNER JOIN team_count 
+ON t.id = team_count.id
+WHERE CAST(t.charge_cost AS REAL) * team_count.num_employees > 5000
+
+-- EVEN SIMPLER WAY
+
+SELECT 
+	t.name,
+	CAST(t.charge_cost AS REAL) * COUNT(e.id) AS total_day_charge
+FROM employees AS e INNER JOIN teams AS t
+ON e.team_id = t.id
+GROUP BY t.id 
+HAVING CAST(t.charge_cost AS REAL) * COUNT(e.id) > 5000
+
+--EXTENTION 
+--How many of the employees serve on one or more committees?
+
+SELECT *
+FROM employees_committees 
+
+
+SELECT 
+	Count(id ) - COUNT(DISTINCT(employee_id)) AS number_who_serve_in_more_than_one_commitee
+FROM employees_committees 
+
+--Q2
+How many of the employees do not serve on a committee?
+
+SELECT 
+	COUNT(e.id)
+FROM employees AS e LEFT JOIN employees_committees AS ec
+ON e.id = ec.employee_id
+WHERE committee_id IS NULL
+
+--Q3 Get the full employee details (including committee name) of any committee members based in China.
+
+
+SELECT 
+	e.*,
+	c.name
+FROM employees AS e INNER JOIN employees_committees AS ec 
+ON e.id = ec.employee_id INNER JOIN committees AS c 
+ON ec.committee_id = c.id
+WHERE country = 'China'
+
+--Q4 Group committee members into the teams in which they work,
+--counting the number of committee members in each team (including teams with no committee members). 
+--Order the list by the number of committee members, highest first.
+
+SELECT 
+	t.name,
+	COUNT(DISTINCT(ec.employee_id)) AS number_employees_in_comitttee
+FROM employees_committees AS ec INNER JOIN employees AS e 
+ON ec.employee_id = e.id RIGHT JOIN teams AS t 
+ON e.team_id =t.id
+GROUP BY t.name
+ORDER BY COUNT(DISTINCT(ec.employee_id)) DESC
