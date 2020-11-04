@@ -6,8 +6,8 @@ output: html_notebook
 # Question 1
 Read the cleaned data into R.
 ```{r}
-source("scripts/clean_data_script.R")
-meteorite_landings <- read_csv("clean_data/meteorite_landings_clean_kg.csv")
+library(tidyverse)
+meteorite_landings <- read_csv("../clean_data/meteorite_landings_clean_kg.csv")
 head(meteorite_landings)
 ```
 
@@ -43,7 +43,7 @@ meteorite_landings %>%
 Using bboxfinder I was able to find the latitude and longitude for the continent and create a case when which took   the latitude and longitude from the meteorite findings and categorized this into their continents. I then used this information to create a function to show this information 
 ```{r}
 
-source("functions/show_continent_function.R")
+source("../functions/show_continent_function.R")
 
 show_continent(TRUE, -105.43333)
 ```

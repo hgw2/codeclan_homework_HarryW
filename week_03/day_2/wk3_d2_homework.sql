@@ -134,8 +134,7 @@ SELECT
 	Count(id ) - COUNT(DISTINCT(employee_id)) AS number_who_serve_in_more_than_one_commitee
 FROM employees_committees 
 
---Q2
-How many of the employees do not serve on a committee?
+--Q2 How many of the employees do not serve on a committee?
 
 SELECT 
 	COUNT(e.id)
