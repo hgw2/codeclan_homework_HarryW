@@ -165,4 +165,43 @@ GROUP BY first_name
 HAVING count(first_name) > 1
 ORDER BY count DESC, first_name ASC
 
+--Q2 Have a look again at your table for core question 6. 
+--It will likely contain a blank cell for the row relating to employees with ‘unknown’ pension enrollment status. 
+--This is ambiguous: it would be better if this cell contained ‘unknown’ or something similar. 
+--Can you find a way to do this, perhaps using a combination of COALESCE() and CAST(), or a CASE statement?
 
+SELECT 
+	COALESCE(CAST(pension_enrol AS varchar), 'unknown') AS pension_enrollment,
+	COUNT(id) AS num_employees
+FROM employees 
+GROUP BY pension_enrol 
+
+--Q3 Find the first name, last name, email address and start date of all the employees who are members of the ‘Equality and Diversity’ committee.
+-- Order the member employees by their length of service in the company, longest first.
+
+SELECT 
+	e.first_name,
+	e.last_name,
+	e.email,
+	e.start_date,
+	c.name
+FROM employees AS e INNER JOIN employees_committees AS ec
+ON e.id = ec.employee_id INNER JOIN committees AS c
+ON ec.committee_id = c.id
+WHERE c.name = 'Equality and Diversity'
+ORDER BY e.start_date 
+
+-- Q4  Use a CASE() operator to group employees who are members of committees into salary_class of 'low' (salary < 40000) or 'high' (salary >= 40000).
+-- A NULL salary should lead to 'none' in salary_class. Count the number of committee members in each salary_class.
+
+SELECT 
+	CASE 
+		WHEN salary < 40000 THEN 'low' 
+		WHEN salary >= 40000 THEN 'high'
+		ELSE 'none'
+	END AS salary_class,
+	count(DISTINCT(e.id)) AS num_employees
+FROM employees AS e INNER JOIN employees_committees AS ec
+ON e.id = ec.employee_id INNER JOIN committees AS c
+ON ec.committee_id = c.id
+GROUP BY salary_class
