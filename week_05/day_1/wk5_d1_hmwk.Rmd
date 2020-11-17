@@ -91,7 +91,7 @@ backpack %>%
   mutate(back_problems = as.logical(back_problems)) %>% 
   ggplot() +
   aes(x= back_problems) +
-  geom_bar(fill = "light blue") +
+  geom_bar(fill = "blue") +
   labs(
     x = "Back problems",
     y = "number of people",
@@ -108,7 +108,7 @@ backpack %>%
   group_by(back_problems) %>% 
   summarise(count = n()) %>% 
   ggplot() +
-  aes(x="", y = count, fill = back_problems ) +
+  aes(x="", y = count, fill = back_problems) +
   coord_polar("y", start=0) +
   geom_bar(stat = "identity") +
   labs(
@@ -138,10 +138,13 @@ Is this proportion different between men and women?
  
 ```
 ```{r}
-
-  ggplot(backpack) +
-  aes(x= back_problems) +
-  geom_bar() +
+backpack %>% 
+mutate(back_problems = ifelse(back_problems == TRUE, "Yes", "No")) %>% 
+  group_by(back_problems, sex) %>% 
+  summarise(count = n()) %>% 
+  ggplot() +
+  aes(x= "", y = count, fill = back_problems ) +
+  geom_bar(stat= "identity", position = "fill") +
   labs(
     x = "Back problems",
     y = "number of people",
