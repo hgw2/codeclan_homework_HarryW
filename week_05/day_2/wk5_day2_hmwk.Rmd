@@ -146,7 +146,7 @@ person_label <- c("Person 1", "Person 2", "Person 3", "Person 4", "Person 5")
 names(person_label) <- c("person1", "person2", "person3", "person4", "person5")
 
 device_data %>% 
-  mutate(time = hours + (mins/100)) %>% 
+  mutate(time = hours + (mins/60)) %>% 
   ggplot() +
   aes(x = time , y = counts, colour = device) +
  geom_line() + 
