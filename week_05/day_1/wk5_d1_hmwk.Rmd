@@ -25,14 +25,14 @@ What is the distribution of backpack weights that students are carrying? Choose 
 ```{r}
 ggplot(backpack) +
   aes(x = backpack_weight) +
-  geom_histogram( fill = "blue", colour = "black", bins = 30, alpha = 0.5) +
+  geom_histogram( fill = "blue", colour = "black", bins = 27, alpha = 0.5) +
   geom_density(aes(y = ..count..)) + 
   labs(
     x = "Backpack Weight (lbs)",
     y = "Count",
     title = "Distribution of backpack weights"
   ) +
-  scale_y_continuous(breaks = 0:13)
+  scale_y_continuous(breaks = 0:20)
 ```
 
 From the graph we can see that the majority of backpack weight fall below 15lbs. However there is one outlier of over 30 lbs.
@@ -143,8 +143,8 @@ mutate(back_problems = ifelse(back_problems == TRUE, "Yes", "No")) %>%
   group_by(back_problems, sex) %>% 
   summarise(count = n()) %>% 
   ggplot() +
-  aes(x= "", y = count, fill = back_problems ) +
-  geom_bar(stat= "identity", position = "fill") +
+  aes(x= "" , y = count, fill = back_problems ) +
+  geom_col( position = "fill") +
   labs(
     x = "Back problems",
     y = "number of people",
@@ -154,6 +154,8 @@ mutate(back_problems = ifelse(back_problems == TRUE, "Yes", "No")) %>%
  
  
 ```
+
+
 
 ## Question 8
 Now you’ve investigated your data separately, create plots to describe the relationship between backpack weight, body weight, gender and reported backpain.
