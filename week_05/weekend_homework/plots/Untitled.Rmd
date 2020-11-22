@@ -30,7 +30,67 @@ trophies_long <- trophies %>%
   mutate(country = str_squish(country)) %>% 
   mutate(trophy = str_replace_all(trophy, "_", " ")) %>% 
   mutate(trophy = str_to_title(trophy))
+
+
+players_longer <- players %>% 
+  select(-(six_nations_won:rpi_score)) %>% 
+  relocate(club, .after = player) %>% 
+  pivot_longer(six_nations_matches:x2019_red_cards,
+               names_to = "stat",
+               values_to ="count") %>% 
+  drop_na(count)
+
+all_countries <- players_longer %>% 
+  distinct(country) %>% 
+  pull()
+
+all_clubs <- players_longer %>% 
+  distinct(club) %>% 
+  pull()
+club_colours <- c("Toulouse" = "#c70023",   
+                                "Brive" = "#353638",
+                                "Racing 92" = "#b6e0f2",     
+                                "Touloun"  =     "#a6032b",  
+                                "Montpellier"   ="#51ade7" ,
+                                "Bordeaux" ="#893240",     
+                                "Grenoble"  ="#3565bd",     
+                                "La Rochelle" = "#33272f",   
+                                "Lyon" = "#d20f38",          
+                                "Castres" = "#0461cd",        
+                                "Stade Francais" ="#ff70af", 
+                                "Agen" = "#f7fcfe",        
+                                "Clermont" ="#f4d201",      
+                                "Leinster" ="#007dba",      
+                                "Connacht" ="#058d55",      
+                                "Ulster" ="#d9d9d9",       
+                                "Munster" ="#fe2a4e",       
+                                "Edinburgh" =   "#282841",  
+                                "Glasgow" ="#605458",      
+                                "Worcester" ="#203565",     
+                                "Gloucester" ="#941b24" ,   
+                                "Northampton" ="#35706c",  
+                                "Saracens" ="#3a3c47",      
+                                "Sale" = "#2b406c",         
+                                "Cardiff Blues" =" #30365a",
+                                "Scarlets" ="#cd3437" ,      
+                                "Gwent Dragons" ="#1c1c21",  
+                                "Ospreys" ="#17131a",        
+                                "Bath"= "#0f57e2" ,          
+                                "Leicester" ="#24594c",    
+                                "Exeter Chiefs" ="#a59eb5",
+                                "Wasps" = "#ef863e",        
+                                "Harlequins" ="#9fd6e8" ,  
+                                "Zebre"  = "#2d2425",       
+                                "Benetton" = "#03905f")
+
+country_colours <- c("England" = "#fefefe",
+                      "Scotland" = "#003157",
+                      "Wales" = "#f90000",
+                      "Ireland" = "#00ae12",
+                      "Italy" = "#65d0f7" ,
+                      "France" = "#1601ff")
 ```
+
 
 
 ```{r}
@@ -98,11 +158,7 @@ player_weight <- players %>%
   mutate(weight_in_kg = as.numeric(weight_in_kg)) %>% 
   filter(country == "France")
 
-player_weight %>% 
-  ggplot() +
-  aes(x = weight_in_kg, fill = forward_or_back) +
-  geom_density(alpha = 0.5) + 
-  theme_minimal()
+
 
 
 ```
@@ -117,7 +173,7 @@ teams_points <- teams %>%
 
 
 teams_points %>% 
-  filter(country == "") %>% 
+  filter(country == "England") %>% 
   drop_na(total) %>% 
   ggplot()+
   aes(x = reorder(score_type, -total),y = total, fill = score_type, ) +
@@ -153,73 +209,14 @@ teams_longer %>%
 
 ## Top 5
 
-```{r}
-players_longer <- players %>% 
-  select(-(six_nations_won:rpi_score)) %>% 
-  relocate(club, .after = player) %>% 
-  pivot_longer(six_nations_matches:x2019_red_cards,
-               names_to = "stat",
-               values_to ="count") %>% 
-  drop_na(count)
 
-all_countries <- players_longer %>% 
-  distinct(country) %>% 
-  pull()
-
-all_clubs <- players_longer %>% 
-  distinct(club) %>% 
-  pull()
-club_colours <- c("Toulouse" = "#c70023",   
-                                "Brive" = "#353638",
-                                "Racing 92" = "#b6e0f2",     
-                                "Touloun"  =     "#a6032b",  
-                                "Montpellier"   ="#51ade7" ,
-                                "Bordeaux" ="#893240",     
-                                "Grenoble"  ="#3565bd",     
-                                "La Rochelle" = "#33272f",   
-                                "Lyon" = "#d20f38",          
-                                "Castres" = "#0461cd",        
-                                "Stade Francais" ="#ff70af", 
-                                "Agen" = "#f7fcfe",        
-                                "Clermont" ="#f4d201",      
-                                "Leinster" ="#007dba",      
-                                "Connacht" ="#058d55",      
-                                "Ulster" ="#d9d9d9",       
-                                "Munster" ="#fe2a4e",       
-                                "Edinburgh" =   "#282841",  
-                                "Glasgow" ="#605458",      
-                                "Worcester" ="#203565",     
-                                "Gloucester" ="#941b24" ,   
-                                "Northampton" ="#35706c",  
-                                "Saracens" ="#3a3c47",      
-                                "Sale" = "#2b406c",         
-                                "Cardiff Blues" =" #30365a",
-                                "Scarlets" ="#cd3437" ,      
-                                "Gwent Dragons" ="#1c1c21",  
-                                "Ospreys" ="#17131a",        
-                                "Bath"= "#0f57e2" ,          
-                                "Leicester" ="#24594c",    
-                                "Exeter Chiefs" ="#a59eb5",
-                                "Wasps" = "#ef863e",        
-                                "Harlequins" ="#9fd6e8" ,  
-                                "Zebre"  = "#2d2425",       
-                                "Benetton" = "#03905f")
-
-country_colours <- c("England" = "#fefefe",
-                      "Scotland" = "#003157",
-                      "Wales" = "#f90000",
-                      "Ireland" = "#00ae12",
-                      "Italy" = "#65d0f7" ,
-                      "France" = "#1601ff")
-```
 
 ```{r}
 players_longer %>% 
   distinct(country, club, player, forward_or_back) %>% 
-  filter(country %in%  "France") %>% 
+  filter(country %in%  "Scotland") %>% 
   group_by(club) %>% 
   summarise(total_number = n()) %>% 
- slice_max(total_number, n = 5, with_ties = FALSE) %>% 
   ggplot() + 
   aes(x= reorder(club, -total_number), y= total_number, fill = club)+
   geom_col() + 
@@ -245,7 +242,9 @@ players_longer %>%
   ggplot() + 
   aes(x = reorder(player, - count), y= count, fill = country)+
   geom_col(colour = "black")+
- geom_text(aes(label= total_number),  vjust=-0.3) + theme(axis.line=element_blank(),axis.text.y=element_blank(),
+ geom_text(aes(label= count),  vjust=-0.3) +
+ scale_fill_manual(values = country_colours)+
+ theme(axis.line=element_blank(),axis.text.y=element_blank(),
           axis.ticks=element_blank(),
           axis.title.y=element_blank(),
           panel.background=element_blank(),
@@ -253,7 +252,9 @@ players_longer %>%
        panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
        plot.background=element_blank())
+       
 ```
+
 ```{r}
 players_longer %>% 
   filter(country %in% all_countries) %>% 
@@ -272,6 +273,7 @@ players_longer %>%
           panel.grid.minor=element_blank(),
        plot.background=element_blank())
 ```
+
 ```{r}
 players_longer %>% 
   filter(country %in% all_countries) %>% 
@@ -289,5 +291,63 @@ scale_fill_manual(values = country_colours)+
        panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
        plot.background=element_blank())
+```
+```{r}
+
+player_info <- players %>% 
+  select(player, club,  position_detailed,born, height_in_metres, weight_in_kg, forward_or_back, country) %>% 
+  mutate(weight_in_kg = as.numeric(weight_in_kg)) %>% 
+  mutate(weight_in_kg = round(weight_in_kg)) %>% 
+  mutate(forward_or_back = factor(forward_or_back, levels = c("Forward", "Back")))
+
+player_table <- player_info %>% 
+  filter(country == "England") %>% 
+  select(player:weight_in_kg) %>% 
+  rename_all(funs(str_replace_all(., "_", " "))) %>% 
+  rename_all(funs(str_to_title(.)))
+
+player_table
+
+```
+
+```{r}
+player_info %>% 
+  filter(country == "England") %>% 
+  ggplot() +
+  aes(x = weight_in_kg, fill = forward_or_back) +
+  geom_density(alpha = 0.5) + 
+  theme_minimal() +
+  theme(axis.text.y=element_blank(),
+          axis.ticks=element_blank())+
+  labs(x = "Weight (kg)", fill = "", y = "")
+```
+```{r}
+  
+  player_info %>% 
+  filter(country == "England") %>% 
+      group_by(club) %>%
+      summarise(total_number = n()) %>%
+      ggplot() +
+      aes(x = reorder(club, total_number), y = total_number, fill = club) +
+      geom_col(colour = "black") +
+      scale_fill_manual(values = club_colours, guide = FALSE) +
+      labs(x = "Club", y = "Number of PLayers") +
+      geom_text(aes(label = total_number), vjust = 0.3, hjust = -1) +
+  coord_flip() +
+      theme(
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_blank())
+
+
+
+
 ```
 

@@ -9,17 +9,27 @@ trophies <- read_csv(here("clean_data/trophies.csv"))  %>%
   mutate(trophy = factor(trophy, levels = c("Wooden Spoon", "Doddie Weir Trophy","Auld Alliance Trophy","Guseppe Garibaldi Trophy", "Centanary Quaich", "Millenium Trophy", "Calcutta Cup", "Triple Crown", "Grand Slam", "Champions")))
 players <- read_csv(here("clean_data/players.csv"))
 
+player_info <- read_csv(here("clean_data/players_info.csv"))
+
 distinct_teams <- teams %>% 
   distinct(variable) %>% 
   pull()
 
 all_countries <- players%>% 
   distinct(country) %>% 
+  arrange(country) %>% 
   pull()
 
 all_clubs <- players %>% 
   distinct(club) %>% 
+  arrange(club) %>% 
   pull()
+
+all_positions <- players %>% 
+  distinct(forward_or_back) %>% 
+  pull()
+
+
 club_colours <- c("Toulouse" = "#c70023",   
                   "Brive" = "#353638",
                   "Racing 92" = "#b6e0f2",     
@@ -44,7 +54,7 @@ club_colours <- c("Toulouse" = "#c70023",
                   "Northampton" ="#35706c",  
                   "Saracens" ="#3a3c47",      
                   "Sale" = "#2b406c",         
-                  "Cardiff Blues" =" #30365a",
+                  "Cardiff Blues" = "#30365a",
                   "Scarlets" ="#cd3437" ,      
                   "Gwent Dragons" ="#1c1c21",  
                   "Ospreys" ="#17131a",        
@@ -54,7 +64,8 @@ club_colours <- c("Toulouse" = "#c70023",
                   "Wasps" = "#ef863e",        
                   "Harlequins" ="#9fd6e8" ,  
                   "Zebre"  = "#2d2425",       
-                  "Benetton" = "#03905f")
+                  "Benetton" = "#03905f",
+                  "England Under 20's" = "#fefefe")
 
 country_colours <- c("England" = "#fefefe",
                      "Scotland" = "#003157",

@@ -3,13 +3,6 @@ source(here("code.R"))
 
 ui <- fluidPage(
   dashboardPage(
-    dashboardHeader(title = "2019 Six Nations "),
-    dashboardSidebar(
-      sidebarMenu(
-        menuItem("Overall", tabName = "overall", icon = icon("trophy")),
-        menuItem("Top 5", tabName = "top_5", icon = icon("football-ball"))
-      )
-    ),
     dashboardBody(
       tabItems(
         tabItem(
@@ -21,6 +14,7 @@ ui <- fluidPage(
               column(
                 12,
                 sliderInput("year",
+                            
                             "Select year",
                             value = 2019,
                             max = 2019, min = 2000,
@@ -31,6 +25,7 @@ ui <- fluidPage(
                 width = 12,
                 plotOutput("trophy")
             )
+            
           )
         ),
         tabItem(
@@ -41,7 +36,7 @@ ui <- fluidPage(
                 width = 12, status = "primary",
                 fluidRow(
                   column(
-                    4,
+                    4, =
                     "sdfads"
                   ),
                   

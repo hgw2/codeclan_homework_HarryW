@@ -14,5 +14,13 @@ players_longer <- players %>%
                values_to ="count") %>% 
   drop_na(count)
 
+player_info <- players %>% 
+  select(player, club,  position_detailed,born, height_in_metres, weight_in_kg, forward_or_back, country) %>% 
+  mutate(weight_in_kg = as.numeric(weight_in_kg)) %>% 
+  mutate(weight_in_kg = round(weight_in_kg)) %>% 
+  mutate(forward_or_back = factor(forward_or_back, levels = c("Forward", "Back")))
+
 players_longer %>% 
   write_csv("clean_data/players.csv")
+player_info %>% 
+  write_csv("clean_data/players_info.csv")
