@@ -1,0 +1,30 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+You’re going to calculate the conditional probabilities prob( survived ∣ crew ) and prob( survived ∣ passenger ) to settle this dispute.
+
+```{r}
+library(prob)
+library(gtools)
+library(tidyverse)
+```
+
+```{r}
+titanic <- read_csv("data/titanic.csv")
+
+titanic_passenger <-titanic %>% 
+  mutate(passenger_crew = ifelse(str_detect(class, "[0-9]"), "passenger", "crew")) 
+
+#check mutate  worked
+titanic_passenger %>%
+  filter(!class %in% c("1st", "2nd", "3rd"))
+  
+```
+
+```{r}
+prob_crew_survived <- 
+  titanic_passenger %>% 
+  filter(passenger_crew == "crew")
+```
+
