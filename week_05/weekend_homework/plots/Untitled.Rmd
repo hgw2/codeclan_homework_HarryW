@@ -350,4 +350,40 @@ player_info %>%
 
 
 ```
+```{r}
+
+teams_longer %>% 
+  filter(country == "England") %>% 
+  filter(variable %in% c("Tries", "Conversions", "Penalty Goals", "Drop Goals")) %>% 
+  mutate(total = na_if(total, 0)) %>% 
+      drop_na() %>% 
+  ggplot()+
+  aes(x = reorder(variable, -total),y = total, fill = variable, ) +
+    geom_col(show.legend = FALSE)+
+  geom_text(aes(label= total ), vjust=-0.3)+
+  theme(
+        axis.line = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_blank()
+      )
+```
+
+```{r}
+player_stat <- players_longer %>% 
+  filter(str_detect(stat, "x2019")) %>% 
+  mutate(stat = str_remove(stat, "x2019_")) %>% 
+  mutate(stat = str_replace_all(stat, "_", " ")) %>% 
+  mutate(stat = str_to_title(stat)) %>% 
+  distinct(stat) %>% 
+  pull()
+         
+       
+```
 

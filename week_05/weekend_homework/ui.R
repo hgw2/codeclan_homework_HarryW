@@ -1,8 +1,8 @@
 library(here)
-source(here("6_nations_app/code.R"))
+source(here("code.R"))
 
 ui <- fluidPage(
-  dashboardPage(
+  dashboardPage( skin = "black",
     dashboardHeader(title = "2019 Six Nations "),
     dashboardSidebar(
       sidebarMenu(
@@ -64,18 +64,30 @@ ui <- fluidPage(
             
           ),
           fluidRow(
-            box(title = "Top 5 Try Scorers",
+            box(title = selectInput("input1",
+                                    "Select Top 5",
+                                    choices = player_stat, 
+                                    selected = "Tries"),
                 width = 6,
                 plotOutput("tries")),
-            box(title = "Top 5 Point Scorers",
+            box(title = selectInput("input2",
+                                    "Select Top 5",
+                                    choices = player_stat,
+                                    selected = "Points"),
                 width = 6,
                 plotOutput("points"))
           ),
           fluidRow(
-            box(title = "Top 5 Try Assisters",
+            box(title = selectInput("input3",
+                                     "Select Top 5",
+                                     choices = player_stat, 
+                                    selected = "Try Assists"),
                 width = 6,
                 plotOutput("assists")),
-            box(title = "Top 5 carries",
+            box(title = selectInput("input4",
+                                    "Select Top 5",
+                                    choices = player_stat, 
+                                    selected = "Carries"),
                 width = 6,
                 plotOutput("carries"))
             
@@ -92,12 +104,18 @@ ui <- fluidPage(
           ),
           fluidRow(
             column(6,
-                   box(width = 12,
-                       tableOutput("player_info"))
+                   box(title = "Squad",
+                       width = 12,
+                       dataTableOutput("player_info"), 
+                       options = list(`scrollX` = TRUE))
                    ), 
             column(6,
-                   box(width = 12),
-                   box(width = 12),
+                   box(title = "Total Scored",
+                   width = 12,
+                   plotOutput("scores")),
+                   box(title = "Squad Weight",
+                       width = 12,
+                       plotOutput("weight")),
                    box(title = "Clubs",
                        width = 12,
                        plotOutput("club"))

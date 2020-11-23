@@ -59,7 +59,7 @@ server <- function(input, output) {
   
   output$tries <- renderPlot({
    filtered_data() %>% 
-      filter(stat == "x2019_tries") %>%
+      filter(stat == input$input1) %>%
       slice_max(count, n = 5, with_ties = FALSE) %>%
       ggplot() +
       aes(x = reorder(player, -count), y = count, fill = country) +
@@ -83,7 +83,7 @@ server <- function(input, output) {
 
   output$points <- renderPlot({
     filtered_data() %>%
-      filter(stat == "x2019_points") %>%
+      filter(stat == input$input2) %>%
       slice_max(count, n = 5, with_ties = FALSE) %>%
       ggplot() +
       aes(x = reorder(player, -count), y = count, fill = country) +
@@ -106,7 +106,7 @@ server <- function(input, output) {
 
   output$assists <- renderPlot({
     filtered_data() %>%
-      filter(stat == "x2019_try_assists") %>%
+      filter(stat == input$input3) %>%
       slice_max(count, n = 5, with_ties = FALSE) %>%
       ggplot() +
       aes(x = reorder(player, -count), y = count, fill = country) +
@@ -128,7 +128,7 @@ server <- function(input, output) {
   })
   output$carries <- renderPlot({
     filtered_data() %>% 
-      filter(stat == "x2019_carries") %>%
+      filter(stat == input$input4) %>%
       slice_max(count, n = 5, with_ties = FALSE) %>%
       ggplot() +
       aes(x = reorder(player, -count), y = count, fill = country) +
@@ -154,14 +154,14 @@ player_filter <- reactive({
     filter(country == input$select_country) 
 })
   
-output$player_info <- renderTable({
+output$player_info <- renderDataTable({
 player_filter() %>% 
     select(player:weight_in_kg) %>% 
     rename(position = position_detailed) %>%
     rename("height_(m)" = height_in_metres) %>% 
     rename("weight_(Kg)"= weight_in_kg) %>% 
-    rename_all(funs(str_replace_all(., "_", " "))) %>% 
-    rename_all(funs(str_to_title(.))) 
+    rename_all(~ str_replace_all(., "_", " ")) %>% 
+    rename_all(~ str_to_title(.)) 
    })
 
 
@@ -189,5 +189,44 @@ player_filter( ) %>%
       plot.background = element_blank())
 })
 
+output$weight <- renderPlot({
+ player_filter() %>% 
+    ggplot() +
+    aes(x = weight_in_kg, fill = forward_or_back) +
+    geom_density(alpha = 0.5) + 
+    theme_minimal() +
+    theme(axis.text.y=element_blank(),
+          axis.ticks=element_blank())+
+    labs(x = "Weight (kg)", fill = "", y = "")
+})
+
+output$scores <- renderPlot({
+  teams %>% 
+    filter(country == input$select_country) %>% 
+    filter(variable %in% c("Tries", "Conversions", "Penalty Goals", "Drop Goals")) %>% 
+    mutate(variable = factor(variable, levels = c("Tries", "Conversions", "Penalty Goals", "Drop Goals"))) %>% 
+    mutate(total = na_if(total, 0)) %>% 
+    drop_na() %>% 
+    ggplot()+
+    aes(x = variable ,y = total, fill = variable, ) +
+    geom_col(show.legend = FALSE, colour = "black")+
+    geom_text(aes(label= total ), vjust=-0.3)+
+    scale_fill_manual(values = c("Tries" = "#013875", 
+                                 "Conversions" = "#ec182d", 
+                                 "Penalty Goals" = "#2f7b32", 
+                                 "Drop Goals"= "#9fd3f2"))+
+    theme(
+      axis.line = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title.y = element_blank(),
+      axis.title.x = element_blank(),
+      panel.background = element_blank(),
+      panel.border = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      plot.background = element_blank()
+    )
+})
 
 }

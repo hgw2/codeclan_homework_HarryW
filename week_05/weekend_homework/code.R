@@ -15,6 +15,10 @@ distinct_teams <- teams %>%
   distinct(variable) %>% 
   pull()
 
+player_stat <- players %>% 
+  distinct(stat) %>% 
+  pull()
+
 all_countries <- players%>% 
   distinct(country) %>% 
   arrange(country) %>% 

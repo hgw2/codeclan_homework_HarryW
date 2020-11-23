@@ -12,7 +12,12 @@ players_longer <- players %>%
   pivot_longer(six_nations_matches:x2019_red_cards,
                names_to = "stat",
                values_to ="count") %>% 
-  drop_na(count)
+  drop_na(count) %>% 
+  filter(str_detect(stat, "x2019")) %>% 
+  mutate(stat = str_remove(stat, "x2019_")) %>% 
+  mutate(stat = str_remove(stat, "six_nations_")) %>% 
+  mutate(stat = str_replace_all(stat, "_", " ")) %>% 
+  mutate(stat = str_to_title(stat)) 
 
 player_info <- players %>% 
   select(player, club,  position_detailed,born, height_in_metres, weight_in_kg, forward_or_back, country) %>% 
