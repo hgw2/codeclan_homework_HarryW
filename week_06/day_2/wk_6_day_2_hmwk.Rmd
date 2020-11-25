@@ -3,10 +3,12 @@ title: "R Notebook"
 output: html_notebook
 ---
 ```{r}
+library(MASS)
 
 library(janitor)
 
 library(tidyverse)
+library(skimr)
 
 mobiles <- read_csv("data/20190928-items.csv") %>% 
   clean_names()
@@ -16,7 +18,7 @@ head(mobiles)
 
 ```{r}
 mobiles <- mobiles %>% 
-  select(brand, title, rating, total_reviews)
+  dplyr::select(brand, title, rating, total_reviews)
 ```
 
 ```{r}
@@ -25,22 +27,29 @@ mobiles %>%
   summarise(no_of_phones = n()) %>% 
   slice_max(no_of_phones, n = 1)
 ```
+```{r}
+
+samsung_mobiles <- mobiles %>% 
+  filter(brand == "Samsung")
+  
+fitdistr(samsung_mobiles$rating, "normal")
+```
 
 ```{r}
-mobiles_sum_stats <- mobiles %>% 
-  filter(brand == "Samsung") %>% 
+samsung_stats <- samsung_mobiles %>% 
   summarise(
     num = n(),
     mean = mean(rating),
     sd = sd(rating)
   )
 
-mobiles_sum_stats
+
 ```
 ```{r}
 mobiles %>%
   filter(brand == "Samsung") %>% 
-summary()
+  dplyr::select(rating) %>% 
+  skim()
 ```
 
 ```{r}
@@ -48,6 +57,50 @@ mobiles %>%
   filter(brand == "Samsung") %>% 
   ggplot()+
   aes(x = rating) + 
-  geom_histogram(aes(y = ..density..), col = "white", bins = 25)
+  geom_histogram(aes(y = ..density..), col = "white", bins = 25) +
+  stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = samsung_sum_stats$mean, 
+      sd = samsung_sum_stats$sd
+    ),
+    col = "red"
+  )
+```
+It doesn't look like it fits a normal distribution.
+
+
+```{r}
+samsung_mobiles %>%
+  filter(rating >= samsung_stats$mean - samsung_stats$sd) %>%
+  filter(rating <= samsung_stats$mean + samsung_stats$sd) %>%
+  summarise(prop_within_1sd = n() / nrow(samsung_mobiles), s_1 = (pnorm(q = 1) - pnorm(q = -1)))
+```
+```{r}
+samsung_mobiles %>%
+  filter(rating >= samsung_stats$mean - (2*(samsung_stats$sd))) %>%
+  filter(rating <= samsung_stats$mean + (2*(samsung_stats$sd))) %>%
+  summarise(prop_within_3sd = n() / nrow(samsung_mobiles), s_2 = (pnorm(q = 2) - pnorm(q = -2)))
 ```
 
+```{r}
+samsung_mobiles %>%
+  filter(rating >= samsung_stats$mean - (3*(samsung_stats$sd))) %>%
+  filter(rating <= samsung_stats$mean + (3*(samsung_stats$sd))) %>%
+  summarise(prop_within_3sd = n() / nrow(samsung_mobiles), s_3 = (pnorm(q = 3) - pnorm(q = -3)))
+```
+
+```{r}
+library(car)
+
+
+
+
+
+qqnorm(samsung_mobiles$rating)
+qqline(samsung_mobiles$rating, col = "steelblue", lwd = 2)
+qqPlot(samsung_mobiles$rating)
+
+```
+
+A good chunk of the results fit the line however there are a lot of data towards the end of the 
