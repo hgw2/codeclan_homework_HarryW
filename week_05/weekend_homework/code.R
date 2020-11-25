@@ -71,7 +71,7 @@ club_colours <- c("Toulouse" = "#c70023",
                   "Benetton" = "#03905f",
                   "England Under 20's" = "#fefefe")
 
-country_colours <- c("England" = "#fefefe",
+country_colours <- c("England" = "#f5f5f5",
                      "Scotland" = "#003157",
                      "Wales" = "#f90000",
                      "Ireland" = "#00ae12",

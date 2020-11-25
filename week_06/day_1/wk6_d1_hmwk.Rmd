@@ -176,7 +176,7 @@ triage_combinations <- as.tibble(permutations(n = 2,
     slot2 = V2
   )
 
-remaining_combunations <- as.tibble(permutations(n = 5, 
+remaining_combunations <- as.tibble(permutations(n = 6, 
                                                  r = 3, 
                                                  v = remaining_patients, 
                                                  repeats.allowed = FALSE)) %>%
@@ -207,7 +207,8 @@ team_captain <- as.tibble(permutations(n = 8,
   rename(TC = V1)
 
 
-team2 <- as.tibble(combinations(n = 8,
+
+team2 <- as.tibble(combinations(n = 7,
                                 r = 4, 
                                 v = patients, 
                                 repeats.allowed = FALSE)) %>%
@@ -216,5 +217,15 @@ team2 <- as.tibble(combinations(n = 8,
     slot4 = V3, slot5 = V4
   )
 
-nrow(team_captain) * nrow(team2)
 ```
+
+```{r}
+nrow(team_captain) * nrow(team2)
+
+
+```
+
+```{r}
+
+```
+
