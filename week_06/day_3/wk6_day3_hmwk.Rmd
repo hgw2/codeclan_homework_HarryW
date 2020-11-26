@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+library(janitor)
+library(infer)
+library(car)
+```
+# 1.Load the data again, clean_names(), and re-familiarise yourself with it
+```{r}
+ames <- read_csv("data/ames.csv") %>% 
+  clean_names()
+```
+
+# 2.Investigate the distribution of lot_area. Is the distribution roughly normal? If not, what problems do you find?
+
+```{r}
+ames %>% 
+  ggplot() + 
+  aes(x = lot_area) +
+  geom_histogram(col = "white")
+
+
+qqPlot(ames$lot_area)
+```
+
+It seems that it is hugely left skewed> it looks like for the large part that the majority of the data fits a normal distribution. However there are some that there are some which fall outside  the distribution
+
+# 3. Investigate the distribution of lot_area. Is the distribution roughly normal? If not, what problems do you find?
+```{r}
+bootstrap <- ames %>% 
+  specify(response = lot_area) %>% 
+  generate(reps = 5000, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+```
+
+```{r}
+bootstrap %>% 
+  ggplot() + 
+  aes(x = stat) +
+  geom_histogram()
+```
+
+```{r}
+infer_ci_95 <- bootstrap %>% 
+  get_ci(level = 0.95, type = "percentile")
+
+infer_ci_95
+```
+
+```{r}
+bootstrap %>% 
+  visualise(bins =30) +
+  shade_ci(endpoints = infer_ci_95)
+```
+
+```{r}
+infer_ci_99 <- bootstrap %>% 
+  get_ci(level = 0.99, type = "percentile")
+
+infer_ci_99
+```
+
+```{r}
+bootstrap %>% 
+  visualise(bins =30) +
+  shade_ci(endpoints = infer_ci_99)
+```
+
+```{r}
+bootstrap %>% 
+  summarise(mean(stat))
+```
+
+# Extension 
+```{r}
+year_built <- ames %>% 
+  select(year_built) %>% 
+  mutate(before_1920 = year_built < 1920) %>% 
+  mutate(before_1920 = as.numeric(before_1920))
+```
+
+```{r}
+yb_bootstrap <- year_built %>% 
+   specify(response = before_1920) %>% 
+  generate(reps = 200, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+
+ yb_bootstrap %>% 
+  get_ci(level = 0.95, type = "percentile")
+
+yb_bootstrap %>% 
+ summarise( mean(stat))
+```
+```{r}
+yb_bootstrap <- year_built %>% 
+   specify(response = before_1920) %>% 
+  generate(reps = 50000, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+
+ yb_bootstrap %>% 
+  get_ci(level = 0.95, type = "percentile")
+
+yb_bootstrap %>% 
+ summarise( mean(stat))
+```
+The number of reps does not matter too much 
+
+```{r}
+yb_bootstrap <- ames %>% 
+   specify(response = year_built, success = 1920)  %>% 
+  generate(reps = 200, type = "bootstrap") %>% 
+  calculate(stat = "prop")
+
+ yb_bootstrap %>% 
+  get_ci(level = 0.95, type = "percentile")
+
+yb_bootstrap %>% 
+ summarise( mean(stat))
+```
