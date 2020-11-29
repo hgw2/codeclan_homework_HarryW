@@ -5,8 +5,8 @@ account: hgw2
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3281872
-bundleId: 3894681
+bundleId: 3917035
 url: https://hgw2.shinyapps.io/weekend_homework/
-when: 1606130803.85059
+when: 1606598290.12576
 asMultiple: FALSE
 asStatic: FALSE

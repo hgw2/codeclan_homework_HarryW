@@ -1,13 +1,30 @@
 server <- function(input, output) {
+  tournament_name <- reactive({
+    trophies_full %>%
+      filter(year == input$year) %>%
+      distinct(tournament_name) %>% 
+      pull(tournament_name)
+  })
+  
+  tournament_year <- reactive({
+    trophies_full %>%
+      filter(year == input$year) %>%
+      distinct(year) %>% 
+      pull(year)
+  })
+  
+  output$title<- renderText({
+    paste(tournament_year(), tournament_name(), "Trophies", sep = " ")
+  })
   output$trophy <- renderPlot({
-    trophies %>%
+    trophies_full %>%
       filter(year == input$year) %>%
       drop_na() %>%
       ggplot() +
-      aes(x = trophy, fill = country) +
-      geom_bar(colour = "black") +
+      aes(x = trophy, fill = nation) +
+      geom_bar(colour = "black", position = "fill") +
       coord_flip() +
-      labs(x = "Trophy", fill = "Nation") +
+      labs(x = "Trophy \n ", fill = "Nation") +
       scale_fill_manual(values = country_colours) +
       theme(
         axis.line = element_blank(), axis.text.x = element_blank(),
@@ -17,7 +34,8 @@ server <- function(input, output) {
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        plot.background = element_blank()
+        plot.background = element_blank(), 
+        text = element_text(size = 20) 
       )
   })
   
@@ -65,7 +83,7 @@ server <- function(input, output) {
       aes(x = reorder(player, -count), y = count, fill = country) +
       geom_col(colour = "black") +
       geom_text(aes(label = count), vjust = -0.3) +
-      labs(x = "Player", y = "Tries")+
+      labs(x = "\n Player", y = "Tries")+
       scale_fill_manual(values = country_colours, guide = FALSE) +
       theme(
         axis.line = element_blank(),
@@ -76,7 +94,8 @@ server <- function(input, output) {
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        plot.background = element_blank()
+        plot.background = element_blank(),
+        text = element_text(size = 15) 
       )
   })
 
@@ -89,7 +108,7 @@ server <- function(input, output) {
       aes(x = reorder(player, -count), y = count, fill = country) +
       geom_col(colour = "black") +
       scale_fill_manual(values = country_colours, guide = FALSE) +
-      labs(x = "Player", y = "Number of Points")+
+      labs(x = "\n Player", y = "Number of Points")+
       geom_text(aes(label = count), vjust = -0.3) +
       theme(
         axis.line = element_blank(),
@@ -100,7 +119,8 @@ server <- function(input, output) {
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        plot.background = element_blank()
+        plot.background = element_blank(),
+        text = element_text(size = 15) 
       )
   })
 
@@ -112,7 +132,7 @@ server <- function(input, output) {
       aes(x = reorder(player, -count), y = count, fill = country) +
       geom_col(colour = "black") +
       scale_fill_manual(values = country_colours, guide = FALSE) +
-      labs(x = "Player", y = "Try Assists")+
+      labs(x = "\n Player", y = "Try Assists")+
       geom_text(aes(label = count), vjust = -0.3) +
       theme(
         axis.line = element_blank(),
@@ -123,7 +143,8 @@ server <- function(input, output) {
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        plot.background = element_blank()
+        plot.background = element_blank(),
+        text = element_text(size = 15) 
       )
   })
   output$carries <- renderPlot({
@@ -134,7 +155,7 @@ server <- function(input, output) {
       aes(x = reorder(player, -count), y = count, fill = country) +
       geom_col(colour = "black") +
       geom_text(aes(label = count), vjust = -0.3) +
-      labs(x = "Player", y = "Tries")+
+      labs(x = "\n Player", y = "Tries")+
       scale_fill_manual(values = country_colours, guide = FALSE) +
       theme(
         axis.line = element_blank(),
@@ -145,7 +166,8 @@ server <- function(input, output) {
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        plot.background = element_blank()
+        plot.background = element_blank(),
+        text = element_text(size = 15) 
       )
   })
   

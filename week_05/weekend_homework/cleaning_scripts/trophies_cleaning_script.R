@@ -6,8 +6,6 @@ library(here)
 trophies<- read_excel("raw_data/six_nations_2019.xlsx", sheet = "trophies") %>% 
   clean_names()
 
-
-
 trophies_long <- trophies %>% 
   pivot_longer(cols = champions:wooden_spoon,
                values_to = "country",

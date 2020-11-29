@@ -1,0 +1,340 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Hypthesisis testing - practical 
+```{r}
+library(tidyverse)
+library(infer)
+library(beepr)
+data(msleep)
+beep(8)
+```
+
+```{r}
+glimpse(msleep)
+```
+## Question 1
+
+Jabberwockies sleep for around 7 hours a night, on average. Perform an appropriate statistical test to determine whether the mean sleep_total in the sampled population of animal types differs from the typical value for jabberwockies.
+
+α=0.05
+
+H0:mu_aniamls_sleep_total = 7
+H1 mu_animals_sleep_total != 7
+
+```{r}
+observed_stat <- msleep %>% 
+  summarise(mean = mean(sleep_total)) %>% 
+  pull()
+```
+
+```{r}
+null_distribution <- msleep %>% 
+  specify(response = sleep_total) %>% 
+  hypothesise(null = "point", mu = 7) %>% 
+  generate(reps = 10000, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+```
+
+```{r}
+null_distribution %>% 
+  visualise(bins = 30) +
+  shade_p_value(observed_stat, "both")
+```
+
+```{r}
+null_distribution %>% 
+  get_p_value(observed_stat, "both")
+```
+
+Since  the p-value is less than α we reject H0 in favour of Ha. We found enough evidence in the sample to suggest that the sample mean is statistically significantly different from the null value.
+
+## Question 2 
+Perform an appropriate statistical test to determine whether omnivores sleep for significantly longer than herbivores, on average.
+
+α=0.05
+
+H0:mu_sleep_omni - mu sleep_herbivore  = 0
+H1 mu_sleep_omni - mu sleep_herbivore  > 0
+
+
+```{r}
+h_o_animals <- msleep %>% 
+  select(vore, sleep_total) %>% 
+  filter(vore %in% c("omni", "herbi"))
+```
+
+```{r}
+h_o_animals %>% 
+group_by(vore) %>% 
+  summarise(n = n())
+```
+
+```{r}
+h_o_animals %>% 
+  ggplot()+
+  aes(y = sleep_total, x = vore) + 
+  geom_boxplot()
+```
+
+There is clearly a greater spread of herbivores but the medians do not look too diffierent 
+```{r}
+observed_stat <- h_o_animals %>% 
+  specify(sleep_total ~ vore) %>% 
+  calculate("diff in means", order = c("omni", "herbi"))
+```
+
+```{r}
+null_distribution <- h_o_animals %>% 
+  specify(sleep_total ~ vore) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(reps = 10000, type = "permute") %>% 
+  calculate("diff in means", order = c("omni", "herbi"))
+  beep(5)
+```
+
+```{r}
+null_distribution %>% 
+  visualise() +
+  shade_p_value(observed_stat, "right")
+```
+
+```{r}
+null_distribution %>% 
+get_p_value(observed_stat, "right")
+```
+
+The p-value is greater than α and lack sufficient evidence to reject H0 and so we fail to reject H0. Based on our sample, we do not have enough evidence that the mean difference between herbivores and omnivores is statistically significantly different from each other.
+
+## Question 3
+
+Perform an appropriate statistical test to determine whether the proportion of domesticated animal types in the population of animal types is greater than 5%.
+
+H0:  πdomesticated = 0.05
+Ha:  πdomesticated > 0.05
+```{r}
+domesticated <- msleep %>% 
+  mutate(conservation = coalesce(conservation, "not_listed")) %>% 
+  mutate(is_domesticated = ifelse(conservation == "domesticated", "domesticated", "not_domesticated"))
+```
+
+```{r}
+domesticated %>% 
+  group_by(is_domesticated) %>% 
+  summarise(prop = n()/ nrow(domesticated))
+```
+```{r}
+null_distribution <- domesticated %>% 
+  specify(response = is_domesticated, success = "domesticated") %>% 
+  hypothesise(null = "point", p = 0.05) %>% 
+  generate(reps = 10000, type = "simulate") %>% 
+  calculate(stat = "prop")
+```
+
+```{r}
+observed_stat <- domesticated %>% 
+specify(response = is_domesticated, success = "domesticated") %>% 
+  calculate(stat = "prop")
+observed_stat
+```
+
+```{r}
+null_distribution %>% 
+  visualise(bins = 30) +
+  shade_p_value(obs_stat = observed_stat, direction = "right")
+```
+```{r}
+null_distribution %>% 
+get_p_value(obs_stat = observed_stat, direction = "greater")
+```
+
+The p-value is less than α we reject H0 in favour of Ha. We found enough evidence in the sample to suggest that the sample proportion is statistically significantly different greater than the null value.
+
+# Hypothesis testing - interpretation
+
+##  Defining the Hypothesis
+
+### Question 1
+You work for a independent coffee shop. You’ve performed a small survey in the local town and found that 40% of the people you randomly asked were aware of your shop in the town. You then conduct a marketing campaign by flyering local venues and targeting advertisements on social media. Finally you conduct a second small random survey in the town, asking if people are aware of your coffee shop. You want to test the hypothesis that the campaign has significantly increased awareness of the shop.
+
+
+H0:  πaware_of_shop = 0.40
+Ha:  πaware_of_shop > 0.40
+
+H0 = the proportion of people aware of the shop = 0.4
+Ha = the propprotion of people aware of the shop > 0.4 
+
+
+
+As we are using proportions we are using simulation to gather the results.
+
+### Question 2
+
+You work for a website design company and have performed an A/B test on the position of a banner on a website page promoting a particular item.
+
+In the current test, the first group continues to be shown the banner at the right hand side of the webpage (its usual position) while the test group is shown it at the top of the page. The performance metric we will be testing is click through rate (CTR) on the banner, i.e. what proportion of users click on the banner
+
+
+
+H0: pclicks_a - pclicks_B = 0
+Ha pclicks_a - pclicks_B < 0
+
+H0 = the proportion of clicks on a minus the proportion of clicks on b is equal to 0
+Ha the proportion of clicks on a minus the proportion of clicks on be os less than 0
+
+since we are using 2 samples we are using permutation 
+
+### Question 3
+
+You work as an analyst for a car manufacturing company - they have specific standards they must meet for standards and regulation purposes. You have been asked to check the quality control of the manufacture of a particular car part. The part must have a width of 145mm, with a small (given) level of tolerance. You have been given data on a sample of 1,000 parts produced over the period of a week.
+
+
+
+H0:mu_width_part = 145
+H1 mu_width_part != 145
+
+H0 mean width of part = 145
+Ha mean width of part not equal to 145
+
+since we are working with 1 mean we will be using bootstraping
+
+## Interpreting the results
+
+### Question 1
+Coffee shop problem. Significance level: 0.05, calculated p-value: 0.07
+
+the p-value is greater than α then we lack sufficient evidence to reject H0 and so we fail to reject H0. Based on our sample, we do not have enough evidence that the proportion is statistically significantly greater than the null value.
+
+### Question 2
+Website company problem. Significance level: 0.01, p-value: 0.006
+
+The p-value is less than α we reject H0 in favour of Ha. We found enough evidence in the sample to suggest that the sample proportion is statistically significantly  less than the null value
+
+### Question 3
+Manufacturing company problem. Significance level: 0.05, p-value: 0.55
+
+The p-value is greater than α then we lack sufficient evidence to reject H0 and so we fail to reject H0. Based on our sample, we do not have enough evidence that the mean/proportion is statistically significantly different from the null value.
+
+
+# Extension 
+```{r}
+transactions <- read_csv("data/online_retail_subset.csv") 
+```
+
+For the first section we are interested in the purchase of two particular items:
+
+item A - ‘HEART OF WICKER SMALL’ (StockCode 22469)
+item B - ‘LARGE CAKE TOWEL PINK SPOTS’ (StockCode 21110)
+
+```{r}
+association_items <- transactions %>% 
+  filter(StockCode %in% c(22469, 21110))
+```
+
+## Question 1
+```{r}
+supp_a <- transactions %>% 
+  filter(StockCode %in% c(22469)) %>% 
+  summarise(support = n()/nrow(transactions)) %>% 
+  pull(support)
+
+supp_a
+```
+## Question 2
+
+```{r}
+multiple_items <- transactions %>% 
+  filter(StockCode %in% c(22469, 21110)) %>% 
+  group_by(InvoiceNo, Description) %>% 
+  summarise(n = n()) 
+```
+```{r}
+num_a_and_b =transactions %>% 
+  filter(StockCode %in% c(22469, 21110)) %>% 
+  distinct(InvoiceNo, StockCode) %>% 
+  group_by(InvoiceNo) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 1) %>% 
+  summarise(n()) %>% 
+  pull()
+```
+
+```{r}
+supp_atob <- num_a_and_b/nrow(transactions)
+
+supp_atob
+
+conf_atob <- supp_atob/supp_a
+conf_atob
+```
+```{r}
+supp_b <- transactions %>% 
+  filter(StockCode %in% c(21110)) %>% 
+  summarise(support = n()/nrow(transactions)) %>% 
+  pull(support)
+
+supp_b
+```
+
+```{r}
+lift_atob <- supp_atob/(supp_a*supp_b)
+
+lift_atob
+```
+
+```{r}
+library(arules)
+library(arulesViz)
+transactions_reformat <- transactions %>%
+  select(InvoiceNo, Description) %>%
+  na.omit()
+
+write_csv(transactions_reformat, "transactions_reformat.csv")
+
+apriori_format <- read.transactions("transactions_reformat.csv", format = "single", sep = ",", header = TRUE, cols = c("InvoiceNo", "Description"))
+```
+
+
+```{r}
+itemFrequencyPlot(apriori_format,topN=20,type="absolute")
+```
+
+```{r}
+rules <- apriori(apriori_format, parameter = list(supp = 0.01, conf = 0.8, maxlen = 4))
+beep(8)
+```
+```{r}
+inspect(rules[1:5])
+summary(rules)
+```
+
+```{r}
+rules <- rules %>% 
+  sort(by = "confidence", decreasing  = TRUE)
+
+inspect(rules[1:5])
+```
+
+
+
+```{r}
+rules<-apriori(data=apriori_format, parameter=list(supp=0.001,conf = 0.15), 
+               appearance = list(default="rhs",lhs="HAND WARMER UNION JACK"),
+               control = list(verbose=F))
+rules<-sort(rules, decreasing=TRUE,by="confidence")
+
+inspect(rules)
+```
+```{r}
+
+plot(rules,method="graph",shading=NA)
+```
+
+```{r}
+  plot(rules, method = "graph", measure = "support", shading = "lift", 
+    interactive = FALSE, data = NULL, control = NULL)
+beep(8)
+```
+

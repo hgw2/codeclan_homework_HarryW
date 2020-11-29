@@ -8,6 +8,9 @@ teams <- read_csv(here("clean_data/teams.csv"))
 trophies <- read_csv(here("clean_data/trophies.csv"))  %>% 
   mutate(trophy = factor(trophy, levels = c("Wooden Spoon", "Doddie Weir Trophy","Auld Alliance Trophy","Guseppe Garibaldi Trophy", "Centanary Quaich", "Millenium Trophy", "Calcutta Cup", "Triple Crown", "Grand Slam", "Champions")))
 players <- read_csv(here("clean_data/players.csv"))
+trophies_full <- read_csv(here("clean_data/mens_full_trophies.csv"))  %>%  
+  mutate(trophy = factor(trophy, levels = c("Wooden Spoon", "Doddie Weir Trophy","Auld Alliance Trophy","Giuseppe Garibaldi Trophy", "Centenary Quaich", 	
+                                                                                                            "Millennium Trophy", "Calcutta Cup", "Triple Crown", "Grandlam", "Champions")))
 
 player_info <- read_csv(here("clean_data/players_info.csv"))
 
@@ -69,14 +72,17 @@ club_colours <- c("Toulouse" = "#c70023",
                   "Harlequins" ="#9fd6e8" ,  
                   "Zebre"  = "#2d2425",       
                   "Benetton" = "#03905f",
-                  "England Under 20's" = "#fefefe")
+                  "England Under 20's" = "#F5F5F5" )
 
-country_colours <- c("England" = "#f5f5f5",
+country_colours <- c("England" =  "#F5F5F5" ,
                      "Scotland" = "#003157",
                      "Wales" = "#f90000",
                      "Ireland" = "#00ae12",
                      "Italy" = "#65d0f7" ,
-                     "France" = "#1601ff")
+                     "France" = "#1601ff", 
+                     "Not Completed" = "Black",
+                     "World War I" = "Black",
+                     "World War II" = "Black")
 
 
 

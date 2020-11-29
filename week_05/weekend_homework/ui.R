@@ -31,13 +31,13 @@ ui <- fluidPage(
               sliderInput("year",
                 "Select year",
                 value = 2019,
-                max = 2019, min = 2000,
+                max = 2020, min = 1883,
                 sep = "", 
                 ticks = TRUE
               )
             ),
             box(
-              title = "Trophies Won",
+              title = textOutput("title"),
               width = 12,
               plotOutput("trophy")
             )
