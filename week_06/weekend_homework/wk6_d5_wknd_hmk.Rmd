@@ -176,13 +176,14 @@ You work for a website design company and have performed an A/B test on the posi
 
 In the current test, the first group continues to be shown the banner at the right hand side of the webpage (its usual position) while the test group is shown it at the top of the page. The performance metric we will be testing is click through rate (CTR) on the banner, i.e. what proportion of users click on the banner
 
-
+a = right
+b = top
 
 H0: pclicks_a - pclicks_B = 0
 Ha pclicks_a - pclicks_B < 0
 
-H0 = the proportion of clicks on a minus the proportion of clicks on b is equal to 0
-Ha the proportion of clicks on a minus the proportion of clicks on be os less than 0
+H0 = the proportion of clicks on right minus the proportion of clicks on top is equal to 0
+Ha the proportion of clicks on right minus the proportion of clicks on top is less than 0
 
 since we are using 2 samples we are using permutation 
 
@@ -321,7 +322,7 @@ inspect(rules[1:5])
 
 ```{r}
 rules<-apriori(data=apriori_format, parameter=list(supp=0.001,conf = 0.15), 
-               appearance = list(default="rhs",lhs="HAND WARMER UNION JACK"),
+               appearance = list(default="rhs",lhs="LARGE CAKE TOWEL PINK SPOTS"),
                control = list(verbose=F))
 rules<-sort(rules, decreasing=TRUE,by="confidence")
 
@@ -329,12 +330,12 @@ inspect(rules)
 ```
 ```{r}
 
-plot(rules,method="graph",shading=NA)
+plot(rules,method="graph",shading=NA, engine = "html")
 ```
 
 ```{r}
   plot(rules, method = "graph", measure = "support", shading = "lift", 
-    interactive = FALSE, data = NULL, control = NULL)
-beep(8)
+    interactive = FALSE, data = NULL, control = NULL,engine = "html")
+
 ```
 
