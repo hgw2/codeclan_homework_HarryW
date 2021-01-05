@@ -1,0 +1,143 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(broom)
+library(modelr)
+library(ggfortify)
+```
+
+## Question 1
+
+```{r}
+project <- read_csv("data/project_management.csv")
+head(project)
+```
+
+## Question 2
+
+```{r}
+plot <- project %>% 
+  ggplot() + 
+  aes(x = estimated_length, y = actual_length)+
+  geom_point()
+```
+## Question 3
+```{r}
+project %>% 
+  summarise(cor = cor(estimated_length, actual_length))
+```
+
+With a correlation coefficient of 0.805 we can say that there is a strong positive correlation 
+
+
+## Question 4
+```{r}
+model <- lm(formula = actual_length ~ estimated_length, data = project)
+
+model
+```
+
+## Question 5
+```{r}
+tidy(model)
+summary(model)
+```
+
+```{r}
+autoplot(model)
+```
+
+The residual vs fitted does tail off towards the end but there is not a hge variation. Since the p value is less than 0.05 you can say that there is a statically significant relationship.
+
+## Extension
+
+```{r}
+
+autoplot(model)
+```
+
+```{r}
+plot +
+  geom_text(aes(label = 1:nrow(project), hjust = 1.5) )
+```
+from this 18 looks like it could be a non- influential point
+5 looks like it could be an influential point
+
+```{r}
+new_model_line <- project %>% 
+  filter(X1 != 18) 
+
+new_model <- lm(formula = actual_length ~ estimated_length,
+                data = new_model_line
+                  )
+```
+
+```{r}
+new_model
+model
+```
+
+There is not a significant variation so it would be right to say that this should not be classed as a non_influential outier
+
+```{r}
+new_model_line %>% 
+  ggplot(aes(x = estimated_length)) +
+  geom_point(aes(y = actual_length)) +
+  geom_abline(
+    intercept = new_model$coefficients[1],
+    slope = new_model$coefficients[2],
+    col = "red") +
+   geom_abline(
+    intercept = model$coefficients[1],
+    slope = model$coefficients[2],
+    col = "blue")
+  
+  
+```
+
+
+```{r}
+autoplot(new_model)
+```
+```{r}
+new_model_line <- project %>% 
+  filter(X1 != 5) 
+
+new_model <- lm(formula = actual_length ~ estimated_length,
+                data = new_model_line
+                  )
+```
+
+```{r}
+
+model
+new_model
+
+```
+
+There is a significant variation so it would be right to say that this should not be classed as an influential  outier
+
+```{r}
+new_model_line %>% 
+  ggplot(aes(x = estimated_length)) +
+  geom_point(aes(y = actual_length)) +
+  geom_abline(
+    intercept = new_model$coefficients[1],
+    slope = new_model$coefficients[2],
+    col = "red") +
+   geom_abline(
+    intercept = model$coefficients[1],
+    slope = model$coefficients[2],
+    col = "blue")
+  
+  
+```
+
+
+```{r}
+autoplot(new_model)
+```

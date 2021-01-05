@@ -160,9 +160,10 @@ library(sf)
 library(leaflet)
 leaflet(nyc_bikes) %>% 
  addTiles() %>%
-  addCircleMarkers(lng = ~start_long,
-                   lat = ~start_lat)%>%  
-  addPolylines( lat = ~end_lat, lng = ~end_long)
+  addMarkers(lng = ~start_long,
+                   lat = ~start_lat,
+                    clusterOptions = markerClusterOptions()) 
+  
 
 ```
 
