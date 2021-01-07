@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(corrr)
+library(ggfortify)
+library(GGally)
+```
+
+
+
+```{r}
+house_data <- read_csv("data/kc_house_data.csv")
+```
+
