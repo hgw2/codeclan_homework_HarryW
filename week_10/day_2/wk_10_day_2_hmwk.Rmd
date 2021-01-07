@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(GGally)
+library(ggfortify)
+library(corrr)
+```
+
+## Question 1 
+```{r}
+diamond <- read_csv("data/diamonds.csv")
+```
+
+```{r}
+summary(diamonds)
+```
+
+```{r}
+diamonds %>% 
+  select(carat, x:z) %>% 
+ggpairs()
+```
+
+
+```{r}
+diamonds %>% 
+  select(is.numeric) %>% 
+  correlate()
+```
+
+```{r}
+diamonds %>% 
+  select(-x:-z)
+```
+```{r}
+
+```
+

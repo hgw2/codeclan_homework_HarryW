@@ -24,8 +24,12 @@ plot <- project %>%
   ggplot() + 
   aes(x = estimated_length, y = actual_length)+
   geom_point()
+
+plot
 ```
+
 ## Question 3
+
 ```{r}
 project %>% 
   summarise(cor = cor(estimated_length, actual_length))
@@ -44,6 +48,7 @@ model
 ## Question 5
 ```{r}
 tidy(model)
+glance(model)
 summary(model)
 ```
 
