@@ -9,18 +9,22 @@ library(tidyverse)
 library(GGally)
 library(ggfortify)
 library(corrr)
+library(fastDummies)
+library(mosaic)
 ```
 
 ## Question 1 
 ```{r}
-diamond <- read_csv("data/diamonds.csv")
+diamonds <- read_csv("data/diamonds.csv") %>% 
+  select(-X1)
 ```
 
+## Question 2
 ```{r}
 summary(diamonds)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 diamonds %>% 
   select(carat, x:z) %>% 
 ggpairs()
@@ -32,12 +36,115 @@ diamonds %>%
   select(is.numeric) %>% 
   correlate()
 ```
+## Question 3
+```{r}
+diamonds <- diamonds %>% 
+  select(-x:-z)
+```
+
+## Question 4
+```{r message=FALSE, warning=FALSE}
+ggpairs(diamonds)
+```
+### ii
+```{r}
+diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point()
+```
 
 ```{r}
 diamonds %>% 
-  select(-x:-z)
+  ggplot(aes(x = color, y = price))+
+  geom_boxplot()
+```
+## Question 5
+```{r}
+diamonds %>% 
+  distinct(cut)
+```
+There are 5 distinct values so 4 dummy variable
+
+```{r}
+diamonds %>% 
+  distinct(clarity)
+```
+
+```{r}
+diamonds %>% 
+  distinct(color)
 ```
 ```{r}
+diamonds_dummy_cols <- diamonds %>% 
+  dummy_cols(select_columns = c("cut", "clarity","color"),
+             remove_first_dummy =  TRUE,
+             remove_selected_columns = TRUE) %>% 
+  correlate() %>% 
+  focus(price) %>% 
+  arrange(desc(price))
+```
 
+## Question 6
+
+```{r}
+model <- lm(formula = price ~ carat, data = diamonds)
+
+autoplot(model)
+```
+
+```{r}
+summary(model)
+```
+
+THe fit is voog however it does not meet the requirements for the model
+
+```{r}
+model2 <-  lm(formula = log(price) ~ carat, data = diamonds)
+autoplot(model2)
+summary(model2)
+```
+
+```{r}
+model3 <-  lm(formula = log(price) ~ log(carat), data = diamonds)
+autoplot(model3)
+summary(model3)
+```
+
+```{r}
+model4 <-  lm(formula = log(price) ~ log(carat) + color, data = diamonds)
+autoplot(model4)
+summary(model4)
+```
+
+```{r}
+model5 <-  lm(formula = log(price) ~ log(carat) + cut, data = diamonds)
+autoplot(model5)
+summary(model5)
+```
+```{r}
+model6 <-  lm(formula = log(price) ~ log(carat) + clarity, data = diamonds)
+autoplot(model6)
+summary(model6)
+```
+
+clarity is the best predictor
+
+## Extension 
+
+
+```{r}
+model7 <-  lm(formula = log(price) ~ log(carat) * clarity, data = diamonds)
+autoplot(model7)
+summary(model7)
+```
+```{r}
+diamonds %>% 
+  ggplot(aes(y = log(price), x = log(carat), colour = clarity )) +
+  geom_point()+
+geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+plotModel(model7)
 ```
 
