@@ -12,6 +12,7 @@ library(corrr)
 library(ggfortify)
 library(GGally)
 library(modelr)
+library(relaimpo)
 ```
 
 
@@ -258,3 +259,75 @@ anova(mod3a, mod4c)
 mod4c
 
 ## Extension 
+
+ grade:sqft_living  
+ 
+ 
+```{r}
+mod5a <- lm(price ~ grade + sqft_living + lat + view + grade:sqft_living, data = house_data)
+
+autoplot(mod5a)
+
+summary(mod5a)
+```
+
+grade:lat
+```{r}
+mod5b <- lm(price ~ grade + sqft_living + lat + view + grade:lat, data = house_data)
+
+
+
+summary(mod5b)
+```
+
+grade:waterfront
+```{r}
+mod5c <- lm(price ~ grade + sqft_living + lat + view + grade:waterfront, data = house_data)
+
+
+
+summary(mod5c)
+```
+sqftliving:lat
+
+```{r}
+mod5d <- lm(price ~ grade + sqft_living + lat + view + sqft_living:lat, data = house_data)
+
+
+
+summary(mod5d)
+```
+
+sqftliving:waterfront
+```{r}
+mod5e <- lm(price ~ grade + sqft_living + lat + view + sqft_living:waterfront, data = house_data)
+
+
+
+summary(mod5e)
+```
+lat:waterfront
+
+```{r}
+mod5f <- lm(price ~ grade + sqft_living + lat + view + lat:waterfront, data = house_data)
+
+
+
+summary(mod5f)
+```
+
+
+mod5c is the best fit 
+
+```{r}
+anova(mod4a, mod5c)
+
+
+anova(mod5c, mod4a)
+```
+
+
+```{r}
+calc.relimp(mod4a, type = "lmg", rela = TRUE)
+```
+
