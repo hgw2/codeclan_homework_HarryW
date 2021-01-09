@@ -53,7 +53,7 @@ sqft_lot15 - The square footage of the land lots of the nearest 15 neighbors
 
 ```{r}
 house_data <- house_data %>% 
-  select(-c(id, date, sqft_living15, sqft_lot15, zipcode))
+  dplyr::select(-c(id, date, sqft_living15, sqft_lot15, zipcode))
 ```
 
 
@@ -65,7 +65,7 @@ house_data <- house_data %>%
 ```{r}
 house_data <- house_data %>% 
   mutate(renovated = yr_renovated > 0 ) %>% 
-  select(- yr_renovated)
+  dplyr::select(- yr_renovated)
 ```
 
 ```{r}
@@ -80,16 +80,16 @@ alias(lm(formula = price ~ ., data = house_data))
 ```
 ```{r}
 house_data <- house_data %>% 
-  select(-sqft_basement)
+  dplyr::select(-sqft_basement)
 
 alias(lm(formula = price ~ ., data = house_data))
 ```
 ```{r message=TRUE, warning=TRUE}
 house_data_numeric <- house_data %>% 
-  select(is.numeric)
+  dplyr::select(is.numeric)
 
 house_data_nonnumeric <- house_data %>% 
-  select(price, !is.numeric)
+  dplyr::select(price, !is.numeric)
 
 
 ```
@@ -123,13 +123,13 @@ mod1b is probably the best here
 ```{r}
 residual_house_data <- house_data %>% 
   add_residuals(mod1b) %>% 
-  select(- c(price, grade))  
+  dplyr::select(- c(price, grade))  
 
 res_data_numeric <- residual_house_data %>% 
-  select(is.numeric)
+  dplyr::select(is.numeric)
 
 res_data_nonnumeric <- residual_house_data %>% 
-  select( resid, !is.numeric)
+  dplyr::select( resid, !is.numeric)
 
 
 
@@ -165,13 +165,13 @@ mod2a is the better option here
 
 residual_house_data <- house_data %>% 
   add_residuals(mod2a) %>% 
-  select(- c(price, grade, sqft_living))  
+  dplyr::select(- c(price, grade, sqft_living))  
 
 res_data_numeric <- residual_house_data %>% 
-  select(is.numeric)
+  dplyr::select(is.numeric)
 
 res_data_nonnumeric <- residual_house_data %>% 
-  select( resid, !is.numeric)
+  dplyr::select( resid, !is.numeric)
 
 
 
@@ -209,13 +209,13 @@ mod3a
 
 residual_house_data <- house_data %>% 
   add_residuals(mod3a) %>% 
-  select(- c(price, grade, sqft_living, lat))  
+  dplyr::select(- c(price, grade, sqft_living, lat))  
 
 res_data_numeric <- residual_house_data %>% 
-  select(is.numeric)
+  dplyr::select(is.numeric)
 
 res_data_nonnumeric <- residual_house_data %>% 
-  select( resid, !is.numeric)
+  dplyr::select( resid, !is.numeric)
 
 
 
@@ -328,6 +328,6 @@ anova(mod5c, mod4a)
 
 
 ```{r}
-calc.relimp(mod4a, type = "lmg", rela = TRUE)
+calc.relimp(mod4c, type = "lmg", rela = TRUE)
 ```
 

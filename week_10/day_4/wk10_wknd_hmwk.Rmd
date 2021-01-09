@@ -3,17 +3,192 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(tidyverse)
+library(janitor)
+library(GGally)
+library(modelr)
+library(ggfortify)
+library(lubridate)
+
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+```{r}
+avocados <- read_csv("data/avocado.csv") %>% 
+  clean_names()
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+glimpse(avocados)
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+min(avocados$date)
+max(avocados$date)
+
+
+```
+X1 is a row number so we will drop that 
+Date - the date range is from Jan 2015 - March 2018, we could split this up into year and quarter. By spitting into quarter we create less dummy variables instead of month
+There is already a year column so lets create a quarter, we also need to make sure that they are treadt as factors 
+
+
+```{r}
+clean_avocados <- avocados %>% 
+  select(-x1) %>% 
+  mutate(quarter = factor(quarter(date)), .after = date) %>% 
+  mutate(year = factor(year), .after = quarter) 
+```
+
+```{r}
+avocados %>% 
+  distinct(region) %>% 
+  mutate(regions = case_when(
+    str_detect(region, "Al|Bal|Bos|Buff|Harris|Hart|York|Engl|Phil|Pitts|Sy|North" ) ~ "north_east",
+    str_detect(region, "At|Char|Dal|Hous|Jacks|Louis|Miami|Nash|Orlea|Orl|Pheo|Ral|Rich|Roa|Caro|Tamp|Mid|South") ~ "south",
+    str_detect(region, "Boi|Ch|Cin|Col|Det|Grand|Great|India|St" ) ~ "mid_west",
+    str_detect(region, "Cal|Den|Las|Los|Plain|Port|Sac|San|Spo|Sea|Phoe|Tex|West" ) ~ "west",
+    TRUE ~ "group_region"
+    
+  )) %>% 
+  filter(regions == "group_region")
+```
+
+Looking at the regions there appears to be both cities and regions, since we are tyring to predict the average price of the avocado I have groupped them into the smaller regions but I have added a flag column so I coan filter them in and out if they have an impact on the pirce.   
+
+```{r}
+clean_avocados <- clean_avocados %>% 
+  mutate(grouped_market = region %in% c("California", "West", "SouthCentral", "GreatLakes",
+                                        "Midsouth", "Southeast", "Northeast", "Plains",
+                                        "TotalUS")) %>% 
+   mutate(regions = case_when(
+    str_detect(region, "Al|Bal|Bos|Buff|Harris|Hart|York|Engl|Phil|Pitts|Sy|North" ) ~ "north_east",
+    str_detect(region, "At|Char|Dal|Hous|Jacks|Louis|Miami|Nash|Orlea|Orl|Pheo|Ral|Rich|Roa|Caro|Tamp|Mid|South") ~ "south",
+    str_detect(region, "Boi|Ch|Cin|Col|Det|Grand|Great|India|St" ) ~ "mid_west",
+    str_detect(region, "Cal|Den|Las|Los|Plain|Port|Sac|San|Spo|Sea|Phoe|Tex|West" ) ~ "west",
+    TRUE ~ "us_wide"
+    
+  ), .before = grouped_market) %>%  
+  select(-c(region, date)) %>% 
+  relocate(year, .after = quarter) %>% 
+  mutate(regions = factor(regions),
+         type = factor(type))
+```
+
+
+
+Final Check
+```{r}
+summary(clean_avocados)
+```
+
+There are No NA Values it seems that there are 338 Us wide values for average price and 3042 for regional markets. I will drop the US wide values and see what the results are. I will leave the grouped markets in their respective regions. if they have an affect on the model I will filter them out.
+
+# Alias
+
+```{r}
+
+
+alias(lm(average_price ~ ., data = clean_avocados))
+```
+
+# Explanatory Model 
+
+
+
+```{r}
+clean_avocados %>% 
+  ggplot()+
+  aes(x = total_volume, y = average_price, colour = regions)+
+  geom_point() 
+  
+```
+It does appear that the US wide numbers are affecting the distribution so I will filter those out
+
+```{r}
+clean_avocados %>% 
+  filter(regions != "us_wide") %>% 
+  ggplot()+
+  aes(x = total_volume, y = average_price, colour = regions)+
+  geom_point() 
+  
+```
+That provides a much better distribution 
+
+
+```{r}
+clean_avocados %>% 
+  filter(regions != "us_wide") %>% 
+  ggplot()+
+  aes(x = total_volume, y = average_price, colour = grouped_market)+
+  geom_point() 
+  
+```
+```{r}
+clean_avocados %>% 
+  filter(grouped_market == F) %>% 
+  ggplot()+
+  aes(x = total_volume, y = average_price, colour = grouped_market)+
+  geom_point() 
+  
+```
+The shape fo the dsirtibution is pretty much the same so I will keep them in 
+
+A log transformation might be a good option
+```{r}
+clean_avocados <- clean_avocados %>% 
+  filter(regions != "us_wide")
+```
+
+
+```{r}
+library(HH)
+ladder(average_price ~ total_volume, data = clean_avocados)
+```
+
+transformation doesn't offer a huge amount
+
+
+
+```{r message=FALSE, warning=FALSE}
+numeric_avocados <- clean_avocados %>% 
+  select(where(is.numeric))
+
+non_numeric_avocados <- clean_avocados %>% 
+  select(average_price, !is.numeric)
+
+ggpairs(numeric_avocados) 
+ggpairs(non_numeric_avocados) 
+```
+
+x4046 provides the best correlation although there seems to be an odd shape of distribution.
+Group Markets don't seem to have an impact on thebut there does seem to be a good variation on type
+
+```{r}
+mod1a <- lm(average_price ~ type, data = clean_avocados)
+
+autoplot(mod1a) 
+
+summary(mod1a)
+```
+```{r}
+mod1b <- lm(average_price ~ x4046, data = clean_avocados)
+
+autoplot(mod1b) 
+
+summary(mod1b)
+```
+
+```{r}
+mod1c <- lm(average_price ~ regions, data = clean_avocados)
+
+autoplot(mod1c) 
+
+summary(mod1c)
+```
+
+type provide a r^2 values so I will go forward with that model 
+
+
+```{r}
+
+```
 
