@@ -411,7 +411,9 @@ glance(mod4a)
 mod5d offers a better model
 
 ```{r}
-mod5d <- lm(average_price ~ type + regions + quarter + year + regions:quarter, data = train)  
+mod56a <- lm(average_price ~ type + regions + quarter + year + log(total_volume) + regions:quarter, data = train)  
+
+summary(mod56a)
 ```
 
 
@@ -432,4 +434,74 @@ test  <- slice(train, test_index)
 train <- slice(train, -test_index)
 ```
 
+```{r}
+library(glmulti)
+glmulti_fit <- glmulti(
+ average_price ~ ., 
+  data = train,
+  level = 1, # 2 = include pairwise interactions, 1 = main effects only (main effect = no pairwise interactions)
+  minsize = 0, # no min size of model
+  maxsize = -1, # -1 = no max size of model
+  marginality = TRUE, # marginality here means the same as 'strongly hierarchical' interactions, i.e. include pairwise interactions only if both predictors present in the model as main effects.
+  method = "g", # the problem is too large for exhaustive search, so search using a genetic algorithm
+  crit = bic, # criteria for model selection is BIC value (lower is better)
+  plotty = FALSE, # don't plot models as function runs
+  report = TRUE, # do produce reports as function runs
+  confsetsize = 100, # return best 100 solutions
+  fitfunction = lm # fit using the `lm` function
+)
+```
+
+
+```{r}
+model <- lm(glmulti_fit@formulas[[1]], data = train)
+
+calc.relimp(model, type = "lmg", rela = TRUE)
+```
+
+```{r}
+glmulti_best_trans <- lm(log(average_price)~ quarter+year+type+regions+log(total_volume)+if_else(x4225 > 0, log(x4225), 0)+if_else(x_large_bags > 0, log(x_large_bags), 0) +grouped_market + regions:quarter, data = train)
+
+summary(glmulti_best)
+```
+
+```{r}
+gli <- glance(glmulti_best) %>%  
+  mutate(name = "gli_trans") %>% 
+  dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
+
+gli2 <- glance(model) %>%  
+  mutate(name = "gli_non") %>% 
+  dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
+
+my_model <- glance(mod5d) %>%  
+  mutate(name = "mod5d") %>% 
+  dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
+
+bind_rows(gli,gli2,  my_model)
+```
+
+
+```{r}
+
+```
+
+The GLI model is better
+
+```{r}
+predictions <- predict(model, newdata = test)
+
+mean((predictions - test$average_price)**2)
+
+
+predictions <- predict(glmulti_best, newdata = test)
+
+mean((predictions - test$average_price)**2)
+
+predictions <- predict(mod5d, newdata = test)
+
+mean((predictions - test$average_price)**2)
+```
+
+My model is the most accurate
 
