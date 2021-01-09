@@ -10,6 +10,7 @@ library(GGally)
 library(modelr)
 library(ggfortify)
 library(lubridate)
+library(broom)
 
 ```
 
@@ -126,13 +127,22 @@ clean_avocados %>%
 clean_avocados %>% 
   filter(grouped_market == F) %>% 
   ggplot()+
-  aes(x = total_volume, y = average_price, colour = grouped_market)+
+  aes(x = log(total_volume), y = average_price, colour = grouped_market)+
   geom_point() 
   
 ```
-The shape fo the dsirtibution is pretty much the same so I will keep them in 
+The shape fo the distribution is pretty much the same so I will keep them in 
 
 A log transformation might be a good option
+
+
+
+```{r}
+clean_avocados %>% 
+  ggplot(aes(x =average_price))+
+  geom_histogram()
+```
+
 ```{r}
 clean_avocados <- clean_avocados %>% 
   filter(regions != "us_wide")
@@ -146,13 +156,27 @@ ladder(average_price ~ total_volume, data = clean_avocados)
 
 transformation doesn't offer a huge amount
 
+```{r}
+test <- clean_avocados %>% 
+  mutate(test_column = if_else( x4046 > 0, log(x4046),0))
+
+summary(test)
+```
+
+```{r}
+n_data <- nrow(clean_avocados)
+test_index <- sample(1:n_data, size = n_data*0.1)
+
+test  <- slice(clean_avocados, test_index)
+train <- slice(clean_avocados, -test_index)
+```
 
 
 ```{r message=FALSE, warning=FALSE}
-numeric_avocados <- clean_avocados %>% 
+numeric_avocados <- train %>% 
   dplyr::select(where(is.numeric))
 
-non_numeric_avocados <- clean_avocados %>% 
+non_numeric_avocados <- train %>% 
   dplyr::select(average_price, !is.numeric)
 
 ggpairs(numeric_avocados) 
@@ -163,22 +187,34 @@ x4046 provides the best correlation although there seems to be an odd shape of d
 Group Markets don't seem to have an impact on thebut there does seem to be a good variation on type
 
 ```{r}
-mod1a <- lm(average_price ~ type, data = clean_avocados)
+mod1a <- lm(average_price ~ type, data = train)
 
 autoplot(mod1a) 
 
 summary(mod1a)
 ```
 ```{r}
-mod1b <- lm(average_price ~ x4046, data = clean_avocados)
+mod1b <- lm(average_price ~ total_volume, data = train)
 
 autoplot(mod1b) 
 
 summary(mod1b)
 ```
 
+There is quite a lot spread in that data lets try a transformation
+
 ```{r}
-mod1c <- lm(average_price ~ regions, data = clean_avocados)
+mod1b2 <- lm(average_price ~ log(total_volume), data = train)
+
+autoplot(mod1b2) 
+
+summary(mod1b2)
+```
+
+
+
+```{r}
+mod1c <- lm(average_price ~ regions, data = train)
 
 autoplot(mod1c) 
 
@@ -189,7 +225,7 @@ type provide a r^2 values so I will go forward with that model
 
 
 ```{r}
-residual_avocado <- clean_avocados %>% 
+residual_avocado <- train %>% 
   add_residuals(mod1a) %>% 
   dplyr::select(-c(average_price, type))  
 
@@ -205,31 +241,42 @@ ggpairs(res_data_numeric)
 ggpairs(res_data_nonnumeric)
 ```
 ```{r}
-mod2a <- lm(average_price ~ type + regions, data = clean_avocados)
+mod2a <- lm(average_price ~ type + regions, data = train)
 
 autoplot(mod2a) 
 
 summary(mod2a)
 ```
 ```{r}
-mod2b <- lm(average_price ~ type + year, data = clean_avocados)
+mod2b <- lm(average_price ~ type + year, data = train)
 
 autoplot(mod2b) 
 
 summary(mod2b)
 ```
 ```{r}
-mod2c <- lm(average_price ~ type + x4046, data = clean_avocados)
+mod2c <- lm(average_price ~ type + total_volume, data = train)
 
 autoplot(mod2c) 
 
 summary(mod2c)
 ```
+```{r}
+mod2c2 <- lm(average_price ~ type + log(total_volume), data = train)
 
-mod2a <- lm(average_price ~ type + regions, data = clean_avocados) is the best
+autoplot(mod2c2) 
+
+summary(mod2c2)
+```
+ 
+mod2a <- lm(average_price ~ type + regions, data = train) is the best
+```{r}
+anova(mod2a, mod1a)
+```
+
 
 ```{r}
-residual_avocado <- clean_avocados %>% 
+residual_avocado <- train %>% 
   add_residuals(mod2a) %>% 
   dplyr::select(-c(average_price, type, regions))  
 
@@ -247,22 +294,28 @@ ggpairs(res_data_nonnumeric)
 
 
 ```{r}
-mod3a <- lm(average_price ~ type + regions + year, data = clean_avocados) 
+mod3a <- lm(average_price ~ type + regions + year, data = train) 
 summary(mod3a)
 ```
 ```{r}
-mod3b <- lm(average_price ~ type + regions + quarter, data = clean_avocados) 
+mod3b <- lm(average_price ~ type + regions + quarter, data = train) 
 summary(mod3b)
 ```
 ```{r}
-mod3b <- lm(average_price ~ type + regions + x4046, data = clean_avocados) 
+mod3b <- lm(average_price ~ type + regions + log(total_volume), data = train) 
+autoplot(mod3b)
 summary(mod3b)
 ```
 
-mod3b <- lm(average_price ~ type + regions + quarter, data = clean_avocados)  is the best
+mod3b <- lm(average_price ~ type + regions + quarter, data = train)  is the best
+
 
 ```{r}
-residual_avocado <- clean_avocados %>% 
+anova(mod3b, mod2a)
+```
+
+```{r}
+residual_avocado <- train %>% 
   add_residuals(mod3b) %>% 
   dplyr::select(-c(average_price, type, regions, quarter))  
 
@@ -279,9 +332,104 @@ ggpairs(res_data_nonnumeric)
 ```
 
 ```{r}
-mod4a <- lm(average_price ~ type + regions + quarter + year, data = clean_avocados)  
+mod4a <- lm(average_price ~ type + regions + quarter + year, data = train)  
 summary(mod4a)
 ```
 
+```{r}
+mod4b <- lm(average_price ~ type + regions + quarter + log(total_volume), data = train)  
+summary(mod4b)
+```
+
+```{r}
+anova(mod4a, mod3b)
+```
+
+
+```{r}
+mod5a <- lm(average_price ~ type + regions + quarter + year + log(total_volume), data = train)  
+summary(mod5a)
+```
+We are getting very litle for each addition so we will stick with mod4a and look at interations
+
+mod4a <- lm(average_price ~ type + regions + quarter + year, data = train)  
+
+type:regions
+
+```{r}
+mod5a  <- lm(average_price ~ type + regions + quarter + year + type:regions, data = train)  
+
+summary(mod5a)
+```
+
+type:quarter
+```{r}
+mod5b  <- lm(average_price ~ type + regions + quarter + year + type:quarter, data = train)  
+
+summary(mod5b)
+```
+
+type:year
+```{r}
+mod5c  <- lm(average_price ~ type + regions + quarter + year + type:year, data = train)  
+
+summary(mod5c)
+```
+
+reagions:quarter
+```{r}
+mod5d  <- lm(average_price ~ type + regions + quarter + year + regions:quarter, data = train)  
+
+summary(mod5d)
+```
+
+regions:year
+```{r}
+mod5e  <- lm(average_price ~ type + regions + quarter + year + regions:year, data = train)  
+
+summary(mod5e)
+```
+quarter:year
+```{r}
+mod5f  <- lm(average_price ~ type + regions + quarter + year + quarter:year, data = train)  
+
+summary(mod5e)
+```
+
+
+mod5d  <- lm(average_price ~ type + regions + quarter + year + regions:quarter, data = train)  
+
+```{r}
+anova(mod4a, mod5d)
+```
+
+```{r}
+glance(mod5d)
+glance(mod4a)
+```
+
+mod5d offers a better model
+
+```{r}
+mod5d <- lm(average_price ~ type + regions + quarter + year + regions:quarter, data = train)  
+```
+
+
+```{r}
+library(relaimpo)
+calc.relimp(mod5d, type = "lmg", rela = TRUE)
+```
+The type of avocado makes up 73% of the r2. the R2 is still pretty low though
+
+
+## Predictive model 
+
+```{r}
+n_data <- nrow(train)
+test_index <- sample(1:n_data, size = n_data*0.1)
+
+test  <- slice(train, test_index)
+train <- slice(train, -test_index)
+```
 
 
