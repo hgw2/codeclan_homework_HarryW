@@ -33,7 +33,7 @@ There is already a year column so lets create a quarter, we also need to make su
 
 ```{r}
 clean_avocados <- avocados %>% 
-  select(-x1) %>% 
+  dplyr::select(-x1) %>% 
   mutate(quarter = factor(quarter(date)), .after = date) %>% 
   mutate(year = factor(year), .after = quarter) 
 ```
@@ -67,7 +67,7 @@ clean_avocados <- clean_avocados %>%
     TRUE ~ "us_wide"
     
   ), .before = grouped_market) %>%  
-  select(-c(region, date)) %>% 
+  dplyr::select(-c(region, date)) %>% 
   relocate(year, .after = quarter) %>% 
   mutate(regions = factor(regions),
          type = factor(type))
@@ -150,10 +150,10 @@ transformation doesn't offer a huge amount
 
 ```{r message=FALSE, warning=FALSE}
 numeric_avocados <- clean_avocados %>% 
-  select(where(is.numeric))
+  dplyr::select(where(is.numeric))
 
 non_numeric_avocados <- clean_avocados %>% 
-  select(average_price, !is.numeric)
+  dplyr::select(average_price, !is.numeric)
 
 ggpairs(numeric_avocados) 
 ggpairs(non_numeric_avocados) 
@@ -189,6 +189,99 @@ type provide a r^2 values so I will go forward with that model
 
 
 ```{r}
+residual_avocado <- clean_avocados %>% 
+  add_residuals(mod1a) %>% 
+  dplyr::select(-c(average_price, type))  
 
+res_data_numeric <- residual_avocado %>% 
+  dplyr::select(is.numeric)
+
+res_data_nonnumeric <- residual_avocado %>% 
+  dplyr::select( resid, !is.numeric)
 ```
+
+```{r message=FALSE, warning=FALSE}
+ggpairs(res_data_numeric)
+ggpairs(res_data_nonnumeric)
+```
+```{r}
+mod2a <- lm(average_price ~ type + regions, data = clean_avocados)
+
+autoplot(mod2a) 
+
+summary(mod2a)
+```
+```{r}
+mod2b <- lm(average_price ~ type + year, data = clean_avocados)
+
+autoplot(mod2b) 
+
+summary(mod2b)
+```
+```{r}
+mod2c <- lm(average_price ~ type + x4046, data = clean_avocados)
+
+autoplot(mod2c) 
+
+summary(mod2c)
+```
+
+mod2a <- lm(average_price ~ type + regions, data = clean_avocados) is the best
+
+```{r}
+residual_avocado <- clean_avocados %>% 
+  add_residuals(mod2a) %>% 
+  dplyr::select(-c(average_price, type, regions))  
+
+res_data_numeric <- residual_avocado %>% 
+  dplyr::select(is.numeric)
+
+res_data_nonnumeric <- residual_avocado %>% 
+  dplyr::select( resid, !is.numeric)
+```
+
+```{r message=FALSE, warning=FALSE}
+ggpairs(res_data_numeric)
+ggpairs(res_data_nonnumeric)
+```
+
+
+```{r}
+mod3a <- lm(average_price ~ type + regions + year, data = clean_avocados) 
+summary(mod3a)
+```
+```{r}
+mod3b <- lm(average_price ~ type + regions + quarter, data = clean_avocados) 
+summary(mod3b)
+```
+```{r}
+mod3b <- lm(average_price ~ type + regions + x4046, data = clean_avocados) 
+summary(mod3b)
+```
+
+mod3b <- lm(average_price ~ type + regions + quarter, data = clean_avocados)  is the best
+
+```{r}
+residual_avocado <- clean_avocados %>% 
+  add_residuals(mod3b) %>% 
+  dplyr::select(-c(average_price, type, regions, quarter))  
+
+res_data_numeric <- residual_avocado %>% 
+  dplyr::select(is.numeric)
+
+res_data_nonnumeric <- residual_avocado %>% 
+  dplyr::select( resid, !is.numeric)
+```
+
+```{r message=FALSE, warning=FALSE}
+ggpairs(res_data_numeric)
+ggpairs(res_data_nonnumeric)
+```
+
+```{r}
+mod4a <- lm(average_price ~ type + regions + quarter + year, data = clean_avocados)  
+summary(mod4a)
+```
+
+
 
