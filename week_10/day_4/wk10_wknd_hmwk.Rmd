@@ -133,7 +133,7 @@ clean_avocados %>%
 ```
 The shape fo the distribution is pretty much the same so I will keep them in 
 
-A log transformation might be a good option
+A log transformation might be a good option for understanding total volume
 
 
 
@@ -142,7 +142,7 @@ clean_avocados %>%
   ggplot(aes(x =average_price))+
   geom_histogram()
 ```
-
+Average price seems fairly even distibuted so i won't need to worry too much about transforig it 
 ```{r}
 clean_avocados <- clean_avocados %>% 
   filter(regions != "us_wide")
@@ -154,7 +154,7 @@ library(HH)
 ladder(average_price ~ total_volume, data = clean_avocados)
 ```
 
-transformation doesn't offer a huge amount
+transformation doesn't offer a huge amount when looking at average price but it does for total volume
 
 ```{r}
 test <- clean_avocados %>% 
@@ -193,6 +193,10 @@ autoplot(mod1a)
 
 summary(mod1a)
 ```
+
+The fit looks good and the r^2 is 0.37
+
+
 ```{r}
 mod1b <- lm(average_price ~ total_volume, data = train)
 
@@ -211,7 +215,7 @@ autoplot(mod1b2)
 summary(mod1b2)
 ```
 
-
+The fit is much better is but the r^2 stil not as good as the first model.
 
 ```{r}
 mod1c <- lm(average_price ~ regions, data = train)
@@ -221,7 +225,7 @@ autoplot(mod1c)
 summary(mod1c)
 ```
 
-type provide a r^2 values so I will go forward with that model 
+type provides a r^2 values so I will go forward with that model 
 
 
 ```{r}
@@ -240,6 +244,10 @@ res_data_nonnumeric <- residual_avocado %>%
 ggpairs(res_data_numeric)
 ggpairs(res_data_nonnumeric)
 ```
+
+Regions, year and total volume look the most promising 
+
+
 ```{r}
 mod2a <- lm(average_price ~ type + regions, data = train)
 
@@ -273,7 +281,7 @@ mod2a <- lm(average_price ~ type + regions, data = train) is the best
 ```{r}
 anova(mod2a, mod1a)
 ```
-
+It is statistically significant so we are good to keep regions in
 
 ```{r}
 residual_avocado <- train %>% 
@@ -314,6 +322,9 @@ mod3b <- lm(average_price ~ type + regions + quarter, data = train)  is the best
 anova(mod3b, mod2a)
 ```
 
+It still significant so I will keep that in 
+
+
 ```{r}
 residual_avocado <- train %>% 
   add_residuals(mod3b) %>% 
@@ -340,6 +351,9 @@ summary(mod4a)
 mod4b <- lm(average_price ~ type + regions + quarter + log(total_volume), data = train)  
 summary(mod4b)
 ```
+
+
+Year is also the 
 
 ```{r}
 anova(mod4a, mod3b)
@@ -411,30 +425,26 @@ glance(mod4a)
 mod5d offers a better model
 
 ```{r}
-mod56a <- lm(average_price ~ type + regions + quarter + year + log(total_volume) + regions:quarter, data = train)  
+mod6a <- lm(average_price ~ type + regions + quarter + year + log(total_volume) + regions:quarter, data = train)  
 
-summary(mod56a)
+summary(mod6a)
+
+anova(mod5a, mod6a)
 ```
-
+A transformation of total volume offers a higher r^2  value so I will keep that in 
 
 ```{r}
 library(relaimpo)
-calc.relimp(mod5d, type = "lmg", rela = TRUE)
+calc.relimp(mod6a, type = "lmg", rela = TRUE)
 ```
-The type of avocado makes up 73% of the r2. the R2 is still pretty low though
+Type and total volume are the most important factor in determining the price of avocados
 
 
 ## Predictive model 
 
-```{r}
-n_data <- nrow(train)
-test_index <- sample(1:n_data, size = n_data*0.1)
+Lets use glmulti to build an automated model
 
-test  <- slice(train, test_index)
-train <- slice(train, -test_index)
-```
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 library(glmulti)
 glmulti_fit <- glmulti(
  average_price ~ ., 
@@ -454,19 +464,35 @@ glmulti_fit <- glmulti(
 
 
 ```{r}
-model <- lm(glmulti_fit@formulas[[1]], data = train)
+model <-lm(formula = average_price ~ quarter + year + type + regions + 
+  total_volume + x4225 + x4225 + x_large_bags + x_large_bags + grouped_market + regions:quarter, 
+    data = train)
 
+
+summary(model)
 calc.relimp(model, type = "lmg", rela = TRUE)
 ```
 
-```{r}
-glmulti_best_trans <- lm(log(average_price)~ quarter+year+type+regions+log(total_volume)+if_else(x4225 > 0, log(x4225), 0)+if_else(x_large_bags > 0, log(x_large_bags), 0) +grouped_market + regions:quarter, data = train)
 
-summary(glmulti_best)
+This model still puts type and total volume as the most important. We know from my model that a tranasfomration of total volume works better. 
+
+```{r}
+train %>% 
+  ggplot()+
+  aes(x =if_else(x4225 > 0, log(x4225), 0), y= average_price)+
+  geom_point()
+```
+
+
+
+```{r}
+glmulti_all_trans <- lm(average_price~ quarter+year+type+regions+log(total_volume)+if_else(x4225 > 0, log(x4225), 0)+if_else(x_large_bags > 0, log(x_large_bags), 0) +grouped_market + regions:quarter, data = train)
+
+summary(glmulti_all_trans)
 ```
 
 ```{r}
-gli <- glance(glmulti_best) %>%  
+gli <- glance(glmulti_all_trans) %>%  
   mutate(name = "gli_trans") %>% 
   dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
 
@@ -474,8 +500,8 @@ gli2 <- glance(model) %>%
   mutate(name = "gli_non") %>% 
   dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
 
-my_model <- glance(mod5d) %>%  
-  mutate(name = "mod5d") %>% 
+my_model <- glance(mod6a) %>%  
+  mutate(name = "mod6a") %>% 
   dplyr::select(name, r.squared, adj.r.squared,AIC, BIC)
 
 bind_rows(gli,gli2,  my_model)
@@ -486,22 +512,39 @@ bind_rows(gli,gli2,  my_model)
 
 ```
 
-The GLI model is better
+The GLI transfromed moel is better is better
 
 ```{r}
 predictions <- predict(model, newdata = test)
 
 mean((predictions - test$average_price)**2)
 
+predictions <- predict(model, newdata = train)
 
-predictions <- predict(glmulti_best, newdata = test)
+mean((predictions - train$average_price)**2)
+
+
+predictions <- predict(glmulti_all_trans, newdata = test)
 
 mean((predictions - test$average_price)**2)
 
-predictions <- predict(mod5d, newdata = test)
+predictions <- predict(glmulti_all_trans, newdata = train)
+
+mean((predictions - train$average_price)**2)
+
+
+predictions <- predict(mod6a, newdata = test)
 
 mean((predictions - test$average_price)**2)
+
+predictions <- predict(mod6a, newdata =train )
+
+mean((predictions - train$average_price)**2)
 ```
 
-My model is the most accurate
+The gli with al the transformed variable offers the lowest r^2
+
+```{r}
+summary(glmulti_all_trans)
+```
 

@@ -1,0 +1,69 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# 1 I want to predict how well 6 year-olds are going to do in their final school exams. Using the following variables am I likely under-fitting, fitting well or over-fitting? Postcode, gender, reading level, score in maths test, date of birth, family income.
+
+Generally, the more varibles you use the more likely you are to overfit. So there is a chance that you are overfitting. However these variblea are suited to predicting that so would possibly go fo that.
+
+# 2 If I have two models, one with an AIC score of 34,902 and the other with an AIC score of 33,559 which model should I use?
+
+The model with the AIC of 33,559 as it is lower
+
+# 3 I have two models, the first with: r-squared: 0.44, adjusted r-squared: 0.43. The second with: r-squared: 0.47, adjusted r-squared: 0.41. Which one should I use?
+
+the model with the adjusted r-sqared of 0.43
+
+# 4 I have a model with the following errors: RMSE error on test set: 10.3, RMSE error on training data: 10.4. Do you think this model is over-fitting?
+No it is not overfitted. You would expect the RSME to be much lower on the training data if the model has been overfitted. 
+
+# 5 How does k-fold validation work?
+
+K fold validation splits the data into parts. Using one part as a test set and the remainder as for training. This is then carried out for the remaining parts and then the rest. The mean of each test is then calculated to give an accurate measure of the models performance.
+
+# 6 What is a validation set? When do you need one?
+
+A validate is a thrid set of data that is held back from the model making. It is nescssary to campare other models. It shoud also be used as models can also be overfitted to the test set as various options are added or removed. 
+
+# 7 Describe how backwards selection works.
+
+Backward selection works by starting off with a a complete model and all the variable and then removing the variables that lower the r^2 the least.
+
+# 8 Describe how best subset selection works.
+
+ Use all combinations of predictors until the model with the highest r^2 has been found
+
+# 9 It is estimated on 5% of model projects end up being deployed. What actions can you take to maximise the likelihood of your model being deployed?
+
+Firstly making sure the model is accurate. You also need to make sure that model makes sense and that there are no disallowed variables. There shouls also be even distributions of predictor. Also making sure that the population the model os going to be used is similar to the population that the model has been developed on 
+
+# 10 What metric could you use to confirm that the recent population is similar to the development population?
+
+The PSI or Population Stability Index
+
+
+# 11 How is the Population Stability Index defined? What does this mean in words?
+
+PSI scores the model against the new data compared to the data it was used to train. Essentially the PSI score will change if the model is no longer as predictive as before. 
+
+# 12 Above what PSI value might we need to start to consider rebuilding or recalibrating the model
+
+A figure of 0.1 - 0.2 suggest the mode may need changing. A figure of over 0.2 suggests that the model needs changing 
+
+# 13 What are the common errors that can crop up when implementing a model?
+
+Models can change over time depending on seasonality and the weather. Also people can approach things differently based on various situations. The news can affect how people react to things or 
+
+# 14 After performance monitoring, if we find that the discrimination is still satisfactory but the accuracy has deteriorated, what is the recommended action?
+
+Discrimination is the predictive power and accuracy is how many correct predictions the model makes. If discrimination remains satisfactory, the predictive power is still good but it is not getting the correct number of predictions if accuracy is lowered. This could just be a blimp in the data but the model needs to be monitored 
+
+
+# 15 Why is it important to have a unique model identifier for each model?
+
+So that each individual model can be identified and then any changes can also be accounted for.
+
+# 16 Why is it important to document the modelling rationale and approach?
+
+So it is clear what the model was disgned to do in a business context and any limitations to the model. This enusre that model is usedin the correct way and that who eerve chooses too use the model also knows the best approach to using it. 
