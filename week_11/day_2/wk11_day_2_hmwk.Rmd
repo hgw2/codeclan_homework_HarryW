@@ -101,4 +101,30 @@ library(caret)
 confusionMatrix(titanic_test_pred$pred, titanic_test_pred$survived)
 ```
 
-The model is 81% accurate. The model is able to identify 95% of the people who died but a much lower abilityat ~ 60% to detect people who survived.
+The model is 81% accurate. The model is able to identify 95% of the people who died but a much lower ability at ~ 60% to detect people who survived.
+
+# Extension 
+
+```{r}
+
+titanic_fit <- rpart(
+  formula = survived ~ .,
+  data = titanic_train,
+  method = "class", 
+  control = rpart.control(minsplit = 500, minbucket = 100)
+)
+
+rpart.plot(titanic_fit, yesno = 2, fallen.leaves = TRUE, faclen = 6, digits = 4)
+
+```
+
+```{r}
+titanic_test_pred <- titanic_test %>% 
+  add_predictions(titanic_fit, type = "class")
+```
+
+```{r}
+library(caret)
+
+confusionMatrix(titanic_test_pred$pred, titanic_test_pred$survived)
+```
