@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(modelr)
+library(janitor)
+library(caret)
+library(pROC)
+
+```
+
+
+```{r}
+orange_juice <- read_csv("data/orange_juice.csv") %>% 
+  clean_names()
+
+glimpse(orange_juice)
+```
+
+```{r}
+oj_clean <- orange_juice %>% 
+  mutate(purchase_mm = purchase == "MM", .after = purchase) %>% 
+  select(- purchase) %>% 
+  mutate(across(starts_with("special"), ~ as.logical(.)), 
+         across(starts_with("store"), ~ factor(.)),
+         weekof_purchase = factor(weekof_purchase))
+```
+
+```{r}
+summary(orange_juice_clean)
+```
+
+```{r}
+alias(purchase_mm ~ ., data = oj_clean)
+```
+```{r}
+oj_clean <- oj_clean %>% 
+  select(-c(store,disc_ch, disc_mm, store7, price_diff, list_price_diff) )
+```
+
+```{r}
+alias(purchase_mm ~ ., data = oj_clean)
+```
