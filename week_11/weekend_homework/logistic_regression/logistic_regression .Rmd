@@ -9,7 +9,7 @@ library(modelr)
 library(janitor)
 library(caret)
 library(pROC)
-
+library(glmulti)
 ```
 
 
@@ -30,7 +30,7 @@ oj_clean <- orange_juice %>%
 ```
 
 ```{r}
-summary(orange_juice_clean)
+summary(oj_clean)
 ```
 
 ```{r}
@@ -44,3 +44,316 @@ oj_clean <- oj_clean %>%
 ```{r}
 alias(purchase_mm ~ ., data = oj_clean)
 ```
+
+
+## Split the data train and test set 
+
+```{r}
+n_data <- nrow(oj_clean)
+
+test_index <- sample(1:n_data, size = n_data*0.2)
+
+test  <- slice(oj_clean, test_index)
+train <- slice(oj_clean, -test_index)
+```
+
+
+```{r}
+glmulti_search_all_mains <- glmulti(
+  purchase_mm ~ ., 
+  data = train,
+  level = 1,               # No interactions considered, main effects only
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+```
+
+
+```{r}
+summary(glmulti_search_all_mains)
+```
+
+```{r}
+lowest_bic_all_mains <- glm(purchase_mm ~ 1 + loyal_ch + sale_price_mm + sale_price_ch,
+                            data = train,
+                            family = binomial(link = "logit" ))
+
+summary(lowest_bic_all_mains)
+                            
+```
+```{r}
+glmulti_search_previous_mains_one_pair <- glmulti(
+  purchase_mm ~ loyal_ch + sale_price_mm + sale_price_ch, 
+  data = train,
+  level = 2,               # Interactions considered
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  minsize = 4,             # minsize, maxsize and marginality here force 
+  maxsize = 4,             # inclusion of a single pair beyond the five main effects
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+
+summary(glmulti_search_previous_mains_one_pair)
+
+```
+
+
+```{r}
+lowest_bic_on_pair <- glm(purchase_mm ~ 1 + loyal_ch + sale_price_mm + sale_price_ch +sale_price_ch:sale_price_mm ,
+                            data = train,
+                            family = binomial(link = "logit" ))
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+glmulti_search_previous_mains_two_pair <- glmulti(
+  purchase_mm ~ loyal_ch + sale_price_mm + sale_price_ch, 
+  data = train,
+  level = 2,               # Interactions considered
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  minsize = 5,             # minsize, maxsize and marginality here force 
+  maxsize = 5,             # inclusion of a single pair beyond the five main effects
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+```
+
+
+```{r}
+summary(glmulti_search_previous_mains_two_pair)
+
+lowest_bic_two_pair <- glm(purchase_mm ~loyal_ch + sale_price_mm + sale_price_ch + sale_price_ch:loyal_ch + sale_price_ch:sale_price_mm,
+                            data = train,
+                            family = binomial(link = "logit" ))
+
+```
+```{r message=FALSE, warning=FALSE, include=FALSE}
+glmulti_search_all_mains_aic <- glmulti(
+  purchase_mm ~ ., 
+  data = train,
+  level = 1,               # No interactions considered, main effects only
+  method = "h",            # Exhaustive approach
+  crit = "aic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+```
+
+
+```{r}
+summary(glmulti_search_all_mains_aic)
+```
+
+
+```{r}
+all_mains_aic <- glm(purchase_mm ~  store_id + loyal_ch + sale_price_mm + sale_price_ch +  pct_disc_mm,      
+data = train,
+family = binomial(link = "logit"))
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+glmulti_search_all_mains_pairs_aic <- glmulti(
+  purchase_mm ~  store_id + loyal_ch + sale_price_mm + sale_price_ch +  pct_disc_mm,
+  data = train,
+  level = 2,               # Interactions considered
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  minsize = 6,             # minsize, maxsize and marginality here force 
+  maxsize = 6,             # inclusion of a single pair beyond the five main effects
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+
+ 
+```
+
+```{r}
+summary(glmulti_search_all_mains_pairs_aic )
+
+all_mains_pairs_aic<-glm(purchase_mm ~ 1 + loyal_ch + sale_price_mm + sale_price_ch +     
+  pct_disc_mm + sale_price_ch:loyal_ch + pct_disc_mm:sale_price_ch,
+  data = train,
+  family = binomial(link = "logit"))
+```
+
+```{r}
+all_values <- glm(purchase_mm ~.,
+  data = train,
+  family = binomial(link = "logit"))
+```
+
+```{r}
+all_mains_aic_pred_train <- train %>% 
+  add_predictions(all_mains_aic, type = "response")
+
+all_mains_pairs_aic_pred_train <- train %>% 
+  add_predictions(all_mains_pairs_aic, type = "response")
+
+lowest_bic_all_mains_pred_train <- train %>% 
+  add_predictions(lowest_bic_all_mains, type = "response")
+
+lowest_bic_on_pair_pred_train <- train %>% 
+  add_predictions(lowest_bic_on_pair, type = "response")
+
+lowest_bic_two_pair_pred_train<- train %>% 
+  add_predictions(lowest_bic_two_pair, type = "response")
+
+all_values_pred_train<- train %>% 
+  add_predictions(all_values, type = "response")
+```
+
+
+```{r}
+all_mains_aic_pred_test <- test %>% 
+  add_predictions(all_mains_aic, type = "response")
+
+all_mains_pairs_aic_pred_test <- test %>% 
+  add_predictions(all_mains_pairs_aic, type = "response")
+
+lowest_bic_all_mains_pred_test <- test %>% 
+  add_predictions(lowest_bic_all_mains, type = "response")
+
+lowest_bic_on_pair_pred_test <- test %>% 
+  add_predictions(lowest_bic_on_pair, type = "response")
+
+lowest_bic_two_pair_pred_test<- test %>% 
+  add_predictions(lowest_bic_two_pair, type = "response")
+
+all_values_pred_test<- test %>% 
+  add_predictions(all_values, type = "response")
+```
+
+```{r}
+roc_all_mains_aic_test <- all_mains_aic_pred_test %>% 
+  roc(response = purchase_mm, predictor = pred)
+
+roc_all_mains_pairs_aic_test <- all_mains_pairs_aic_pred_test %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_all_mains_test  <- lowest_bic_all_mains_pred_test %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_on_pair_test <- lowest_bic_on_pair_pred_test %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_two_pair_test <- lowest_bic_two_pair_pred_test%>% 
+  roc(response = purchase_mm, predictor = pred)
+
+roc_all_values_test <- all_values_pred_test%>% 
+  roc(response = purchase_mm, predictor = pred)
+
+test_list <- list(all_aic = roc_all_mains_aic_test, all_aic_pairs = roc_all_mains_pairs_aic_test, bic_all = roc_lowest_bic_all_mains_test, bic_one_pair = roc_lowest_bic_on_pair_test, bic_two = roc_lowest_bic_two_pair_test, all_values = roc_all_values_test )
+```
+
+```{r}
+roc_all_mains_aic_train <- all_mains_aic_pred_train %>% 
+  roc(response = purchase_mm, predictor = pred)
+
+roc_all_mains_pairs_aic_train <- all_mains_pairs_aic_pred_train %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_all_mains_train  <- lowest_bic_all_mains_pred_train %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_on_pair_train <- lowest_bic_on_pair_pred_train %>% 
+  roc(response = purchase_mm, predictor = pred)
+roc_lowest_bic_two_pair_train <- lowest_bic_two_pair_pred_train%>% 
+  roc(response = purchase_mm, predictor = pred)
+
+roc_all_values_train <- all_values_pred_train%>% 
+  roc(response = purchase_mm, predictor = pred)
+
+train_list <- list(all_aic = roc_all_mains_aic_train, all_aic_pairs = roc_all_mains_pairs_aic_train, bic_all = roc_lowest_bic_all_mains_train, bic_one_pair = roc_lowest_bic_on_pair_train, bic_two = roc_lowest_bic_two_pair_train, all_values = roc_all_values_train)
+```
+
+
+```{r}
+roc_curve_train <- ggroc(data = train_list, legacy.axes = TRUE) +
+  coord_fixed()
+
+roc_curve_train
+```
+```{r}
+roc_curve_train <- ggroc(data = test_list, legacy.axes = TRUE) +
+  coord_fixed()
+
+roc_curve_train
+```
+
+They all seem pretty close!
+
+
+```{r}
+results <- tibble(
+  name = c(), auc_train = c(), auc_test = c()
+)
+
+results <- results %>% 
+  add_row(
+    tibble_row(name = "all_aic" ,
+               auc_train =  as.numeric(auc(roc_all_mains_aic_train)),
+                auc_test =  as.numeric(auc(roc_all_mains_aic_test))))
+results <- results %>% 
+  add_row(               
+    tibble_row(name = "all_aic_pairs" ,
+               auc_train = as.numeric(auc(roc_all_mains_pairs_aic_train)),
+                auc_test =  as.numeric(auc(roc_all_mains_pairs_aic_test))))
+results <- results %>% 
+  add_row(
+    tibble_row(name = "bic_all" ,
+               auc_train = as.numeric(auc(roc_lowest_bic_all_mains_train)),
+                auc_test = as.numeric(auc(roc_lowest_bic_all_mains_test))))
+results <- results %>% 
+  add_row(
+    tibble_row(name = "bic_one_pair" ,
+               auc_train = as.numeric(auc(roc_lowest_bic_on_pair_train)),
+                auc_test = as.numeric(auc(roc_lowest_bic_on_pair_test))))
+results <- results %>% 
+  add_row(
+    tibble_row(name = "bic_two_pair" ,
+               auc_train = as.numeric(auc(roc_lowest_bic_two_pair_train)),
+                auc_test = as.numeric(auc(roc_lowest_bic_two_pair_test)
+    
+  )))
+
+results <- results %>% 
+  add_row(
+    tibble_row(name = "all_values" ,
+               auc_train = as.numeric(auc(roc_all_values_train)),
+                auc_test = as.numeric(auc(roc_all_values_test)
+    
+  )))
+ 
+```
+
+```{r}
+results <- results %>% 
+  pivot_longer(cols = auc_train:auc_test, names_to = "measure", values_to = "value")
+```
+
+```{r}
+results %>%
+  ggplot(aes(x = name, y = value, fill = measure)) +
+  geom_col(position = "dodge", alpha = 0.7) +
+  labs(
+    x = "model",
+    y = "auc"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+bic_all has the closest values between
+
+

@@ -1,0 +1,107 @@
+```{r}
+library(tidyverse)
+library(janitor)
+library(broom)
+library(factoextra)
+```
+
+```{r}
+customers <- read_csv("mall_customers.csv") %>% 
+  clean_names()
+```
+
+```{r}
+glimpse(customers)
+```
+
+```{r}
+summary(customers)
+```
+
+```{r}
+customers %>% 
+  ggplot()+ 
+  aes(x = annual_income_k, y = spending_score_1_100, colour = gender) + 
+  geom_point()
+```
+It looks like there could be a possible 5 colours with no clear split by gender.
+
+
+```{r}
+customers %>% 
+  ggplot()+ 
+  aes(x = age, y = spending_score_1_100, colour = gender) + 
+  geom_point()
+```
+
+```{r}
+customers_scaled <- customers %>% 
+  select(annual_income_k, spending_score_1_100) %>% 
+  mutate_all(scale)
+```
+
+
+```{r}
+fviz_nbclust(customers_scaled, kmeans, method = "wss", nstart = 25)
+```
+5 looks like it could be the best option 
+```{r}
+fviz_nbclust(customers_scaled, kmeans, method = "silhouette", nstart = 25)
+```
+Again 5
+
+```{r}
+fviz_nbclust(customers_scaled, kmeans, method = "gap_stat")
+```
+
+This reccommeds 1 cluster which is not very useful for clustering so we will stick with 5 in this case
+
+
+```{r}
+customer_clusters <- kmeans(customers_scaled,5, nstart = 25)
+
+clusters <- augment(customer_clusters, customers)
+```
+
+
+```{r}
+clusters %>% 
+  ggplot() + 
+  aes(x = annual_income_k, y = spending_score_1_100, colour = .cluster) + 
+  geom_point()
+```
+There are clearly 5 clusters here
+
+low_income, low spending
+low_income, high spending
+middle earners and spending
+high income and low spending
+high income and high spending 
+
+```{r}
+clusters %>% 
+  ggplot()+ 
+  aes(x = age, y = spending_score_1_100, colour = .cluster) + 
+  geom_point()
+```
+It also appears that the high spenders are under 40 
+
+
+```{r}
+clusters %>% 
+  ggplot()+ 
+  aes( y = spending_score_1_100, x = .cluster, fill = gender) + 
+  geom_col(position = "dodge")
+
+clusters %>% 
+  ggplot()+ 
+  aes( y = annual_income_k, x = .cluster, fill = gender) + 
+  geom_col(position = "dodge")
+```
+
+There doesn't appear to be a significant split by gender in both income and spending score
+
+You could say that cluster 4 are high earners and high spenders, they are also under 40 so you could describe them as young professionals and also around 30
+
+Cluster 2 are low earners and high spending they are also mainly 20-30 they could be grouped as students and financially responsible. 
+
