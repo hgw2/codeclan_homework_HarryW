@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(modelr)
+
+
+```
+
+
+```{r}
+car_details <- read_csv("data/car_dekho_details.csv") %>% 
+  select(-name)
+
+
+
+```
+
+```{r}
+head(car_details)
+```
+
+
+```{r}
+n_data <- nrow(car_details)
+
+test_index <- sample(1:n_data, size = n_data * 0.2)
+
+test <- slice(car_details, test_index)
+train <- slice(car_details, -test_index)
+```
+
+```{r}
+model <- lm(selling_price ~ .,
+            data = train)
+
+summary(model)
+```
+```{r}
+pred_train <- predict(model, train)
+pred_test <- predict(model, test)
+
+rmse(model, train)
+rmse(model, test)
+
+```
+
+
+R was a bit more straight forward when making the model as you do not need to worry about dropping columns. However the overall exploring the data using panda profiling is very useful. Python also makes it easier to deploy the model.
+R is definitely easier to interpret the model.
+
+## Interpretation 
+
+We can interpret this model that year will increase the value by 4,500 for one year inncrase. However mileage will decrease the selling price. Other significant viables are the seller type. Buying from an individual will decrease the price as will buying a manual transmission car. 
